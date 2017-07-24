@@ -98,7 +98,7 @@ function renderLocalLibs(){
  */
 function getQueryparam($sParam){
     return (isset($_GET) && array_key_exists($sParam, $_GET)) 
-            ? preg_replace('/[^a-z0-9\ \_\-\.]/', '', $_GET[$sParam])
+            ? preg_replace('/[^a-zA-Z0-9\ \_\-\.]/', '', $_GET[$sParam])
             : false
         ;
 }
