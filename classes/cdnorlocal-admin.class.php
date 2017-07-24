@@ -264,12 +264,14 @@ class cdnorlocaladmin extends cdnorlocal{
                         foreach (glob($sLibdir . '/*', GLOB_ONLYDIR) as $sVersiondir){
                             if(!preg_match('/_in_progressXXXX/', $sVersiondir)){
                                 $aReturn[$sLib2test][]=basename($sVersiondir);
+                                krsort($aReturn[$sLib2test]);
                             }
                         }
                     }
                 }
             }
         }
+        ksort($aReturn);
         return $aReturn;
     }
 
@@ -299,6 +301,11 @@ class cdnorlocaladmin extends cdnorlocal{
     public function downloadAssets($sLibrary, $sVersion, $bForceDownload=false){
         $sRelUrl=$sLibrary.'/'.$sVersion;
         $sLocaldir=$this->_getLocalfilename($sRelUrl);
+        
+        // this version was downloaded already
+        if (is_dir($sLocaldir)){
+            return false;
+        }
         $sTmpdir=$sLocaldir.'_in_progress';
         $bAllDownloaded=true;
 
@@ -306,6 +313,7 @@ class cdnorlocaladmin extends cdnorlocal{
         $iFilesLeft=0;
         $iFilesTotal=count($this->getLibraryAssets($sLibrary));
         $this->_putInfoFile($sLibrary);
+        $this->_putLocalLibsFile();
         
         // --- get the first N files...
         $aDownloads=array();
@@ -319,15 +327,19 @@ class cdnorlocaladmin extends cdnorlocal{
                 }
             }
         }
+        // --- get the first N files...
         $this->_httpGet($aDownloads);
+        
+        // --- verify if all was downloaded
         foreach($this->getLibraryAssets($sLibrary) as $sFilename){
             if (!file_exists($sTmpdir.'/'.$sFilename)){
                 $iFilesLeft++;
-                $this->_wd(__METHOD__ . ' missing file after download: '. $sTmpdir.'/'.$sFilename);
+                $this->_wd(__METHOD__ . ' file still missing: '. $sTmpdir.'/'.$sFilename);
                 $bAllDownloaded=false;
             }
         }
         
+        // --- move tmpdir to final dir ... on incomplete downloads try to continue
         if($bAllDownloaded && is_dir($sTmpdir)){
             if(is_dir($sLocaldir)){
                 $this->_wd(__METHOD__ . ' removing '. $sLocaldir);
@@ -344,8 +356,7 @@ class cdnorlocaladmin extends cdnorlocal{
             die();
         }
         $this->_putLocalLibsFile();
-        
-        // TODO cleanup older version if a lib??
+        echo "<script>window.setTimeout('location.reload();', 20);</script>";
         
         return true;
     }
