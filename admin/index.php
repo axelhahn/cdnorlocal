@@ -4,6 +4,7 @@
  * CDNORLOCAL  ::  ADMIN WEB GUI 
  * 
  * search & download libraries on CDNJS
+ * check version of downloaded libraries
  * 
  */
 
@@ -29,10 +30,11 @@ $sVersion = getQueryparam('version');
 
 $aIcons=array(
     
+    'nav-search'=>'fa fa-globe',
+    'nav-browse'=>'fa fa-folder-open-o',
+    
     'home'=>'fa fa-home',
     'search'=>'fa fa-search',
-    'browse'=>'fa fa-inbox',
-    
     'download'=>'fa fa-download',
     'info'=>'fa fa-info-circle',
     'author'=>'fa fa-user',
@@ -85,7 +87,7 @@ function renderNavi(){
                     . '<a href="?module='.$sKey.'"'
                         . ' title="'.$aNavitem['descr'].'"'
                     . '>'
-                    . '<i class="'.$aIcons[$sKey].'"></i> '
+                    . '<i class="'.$aIcons['nav-'.$sKey].'"></i> '
                     . ''.$aNavitem['label'].'</a>'
                 . '</li>';
     }
@@ -419,7 +421,9 @@ switch ($sModule) {
 <!doctype html>
 <html>
     <style>
-        body{background: #304048; background: linear-gradient(#405070, #304048) fixed; color: #9bd; font-family: "arial"; margin: 0;}
+        body{background: #304048; 
+             background: linear-gradient(#405080, #305060, #102030) fixed; 
+             color: #9bd; font-family: "arial"; margin: 0;}
         a{color:#5ce;}
         a:hover{color:#aff;}
         h1{background:rgba(0,0,0,0.2); border-radius: 0.5em; color:#a9f; text-shadow: 1px 1px 2px #000, 0 0 0.8em #abc; font-size: 250%; margin: 0; padding: 0.5em;}
@@ -427,7 +431,7 @@ switch ($sModule) {
         h3{color:#a6b; font-size: 220%; margin: 1.5em 0 0 0;text-shadow: 1px 1px 0 #000;}
         li{padding: 0.5em; transition: ease-in-out 0.2s;}
         tr:hover,li:hover{background: rgba(255,255,255,0.03)}
-        a.button, button{background: #4cd; border: 3px solid rgba(0,0,0,0.3); border-radius: 0.3em; color: #256; font-size: 100%; padding: 0.5em; text-decoration: none; }
+        a.button, button{background: #49a; border: 3px solid rgba(0,0,0,0.3); border-radius: 0.3em; color: #245; font-size: 100%; padding: 0.5em; text-decoration: none; }
         a.button:hover,button:hover{color:#fff;}
         a.download, button.search{background: #3d8;}
         button.reset{background: #eaa;}
