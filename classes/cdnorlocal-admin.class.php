@@ -66,17 +66,21 @@ class cdnorlocaladmin extends cdnorlocal{
             $this->_wd(__METHOD__ . " fetch $sApiUrl");
             $aJson=json_decode(file_get_contents($sApiUrl));
             // echo '<pre>'.print_r($aJson, 1).'</pre>';
-            $this->aLibs[$sLibrary]['_cdn']=$aJson;
+            if($aJson && count($aJson)){
+                $this->aLibs[$sLibrary]['_cdn']=$aJson;
+            }
         }
         if (!array_key_exists('_cdn', $this->aLibs[$sLibrary])){
             return false;
         }
         $aReturn=array();
+        $bFound=false;
         foreach(array('description', 'homepage', 'keywords', 'namespace', 'license', 'version', 'author'/*  */) as $sKey){
             $aReturn[$sKey]=(isset($this->aLibs[$sLibrary]['_cdn']->$sKey)) ? $this->aLibs[$sLibrary]['_cdn']->$sKey : false;
+            $bFound=$bFound || ($aReturn[$sKey]);
         }
         
-        return $aReturn;
+        return $bFound ? $aReturn : false;
     }
     
     
@@ -260,9 +264,11 @@ class cdnorlocaladmin extends cdnorlocal{
                 if (is_dir($sLibdir)){
                     $sLib2test=basename($sLibdir);
                     if(file_exists($this->_getInfoFilename($sLib2test))){
-                        $aReturn[$sLib2test]=array();
                         foreach (glob($sLibdir . '/*', GLOB_ONLYDIR) as $sVersiondir){
                             if(!preg_match('/_in_progressXXXX/', $sVersiondir)){
+                                if(!array_key_exists($sLib2test, $aReturn)){
+                                    $aReturn[$sLib2test]=array();
+                                }
                                 $aReturn[$sLib2test][]=basename($sVersiondir);
                                 krsort($aReturn[$sLib2test]);
                             }

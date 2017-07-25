@@ -46,10 +46,11 @@ $aIcons=array(
     'usage'=>'fa fa-hand-o-right',
     
     'go'=>'fa fa-check',
+    'refresh'=>'fa fa-refresh',
     
     'ok'=>'fa fa-check',
     'warning'=>'fa fa-warning',
-    'refresh'=>'fa fa-refresh',
+    'error'=>'fa fa-bolt',
 );
 
 
@@ -75,6 +76,15 @@ $aNav=array(
 // functions
 // ----------------------------------------------------------------------
 
+
+/**
+ * get html code for navi with highlighting of the current module
+ * 
+ * @global string  $sModule  module
+ * @global array   $aIcons   icon definitions
+ * @global array   $aNav     navigation defintion
+ * @return string
+ */
 function renderNavi(){
     
     global $sModule, $aIcons, $aNav;
@@ -111,55 +121,65 @@ function renderLocalLibs($bSidebar=false){
     
     $sLibAction = (isset($_GET) && array_key_exists('libaction', $_GET)) ? $_GET['libaction'] : '';
     
-    $aLocalLibs=$oCdn->getLocalLibs($sLibAction==='refresh');
-
-    
-    if($aLocalLibs && count($aLocalLibs)){
-        foreach($aLocalLibs as $sMyLibrary=>$aVersions){
-            $sDateOfDownload=false;
-            $sLatestVersion=false;
-            
-            if(!$bSidebar){
-                $aTmp=stat($oCdn->getLocalfile($sMyLibrary));
-                if ($aTmp && is_array($aTmp)){
-                    $sDateOfDownload=date('Y-m-d H:i', $aTmp['mtime']);
-                }
-            }
-            if($sLibAction==='checkversion'){
-                $aApidata=$oCdn->getLibraryMetadata($sMyLibrary);
-                $sLatestVersion=$aApidata['version'];
-            }
-            $sTable.='<tr'
-                    .($sLibrary===$sMyLibrary ? ' class="current"' : '') 
-                    . '>'
-                . '<td><a href="?module=search&action=detail&library='.$sMyLibrary.'&q='.$sLibrarySearch.'" title="Show details for this library"><i class="'.$aIcons['library'].'"></i> '.$sMyLibrary.'</a></td>'
-                . (!$bSidebar ? '<td>'.$sDateOfDownload.'</td>' : '')
-                . ($sLibAction==='checkversion' ? '<td><i class="'.$aIcons['version'].'"></i> '.$sLatestVersion.'</td>' : '')
-                . '<td>'
-                ;
-                foreach($aVersions as $sLibversion){
-                    if(preg_match('/_in_progress/', $sLibversion)){
-                        $sTable.=''
-                                . '<a href="?module=search&action=download&library='.$sMyLibrary.'&version='.str_replace('_in_progress', '', $sLibversion).'&q='.$sLibrarySearch.'" title="Continue download"><i class="'.$aIcons['version'].'"></i> '.$sLibversion.'</a> '
-                                ;
-                    } else {
-                    $sTable.=''
-                            . '<a href="?module=search&action=detail&library='.$sMyLibrary.'&version='.$sLibversion.'&q='.$sLibrarySearch.'" title="Show details for this version"><i class="'.$aIcons['version'].'"></i> '.$sLibversion.'</a> '
-                            . ($sLatestVersion && $sLatestVersion===$sLibversion ? '<span class="ok"><i class="'.$aIcons['ok'].'"></i> Up to date</span>' : '')
-                            . ($sLatestVersion && version_compare($sLatestVersion, $sLibversion, '>') ? '<span class="warning"><i class="'.$aIcons['warning'].'"></i> outdated</span>' : '')
-                            ;
-                    }
-                    $sTable.=' '
-                            
-                            // . '<a href="#" onclick="if (confirm(\'delete '.$sMyLibrary.' v'.$sLibversion.'?\')) {location.href=\'?module=search&action=delete&library='.$sMyLibrary.'&version='.$sLibversion.'&q=\'};" class="delete">x</a>'
-                            . '<br>';
-                }
-            $sTable.='</td>'
-                . '</tr>';
-        }
-    }
     $sUrlCheck = $sLibAction==='checkversion' ? '#':  '?'.$_SERVER["QUERY_STRING"].'&libaction=checkversion';
     $sUrlRefresh= $sLibAction==='refresh' ? '#': '?'.$_SERVER["QUERY_STRING"].'&libaction=refresh';
+    
+    $aLocalLibs=$oCdn->getLocalLibs($sLibAction==='refresh');
+    if(!$aLocalLibs || !count($aLocalLibs)){
+        return $bSidebar 
+            ? '' 
+            : '<p>'
+                . '<span class="info"><i class="'.$aIcons['info'].'"></i> INFO: No downloads so far.</span>'
+                . '<br><br><a href="'.$sUrlRefresh.'" class="button" title="re-read local directories to scan downloaded libs"><i class="'.$aIcons['refresh'].'"></i> Refresh</a>'
+                . '</p>';
+    }
+
+    
+    $sLastLibrary='';
+    foreach($aLocalLibs as $sMyLibrary=>$aVersions){
+        $sLatestVersion=false;
+
+        if($sLibAction==='checkversion'){
+            $aApidata=$oCdn->getLibraryMetadata($sMyLibrary);
+            $sLatestVersion=$aApidata['version'];
+        }
+            foreach($aVersions as $sLibversion){
+                $sDateOfDownload='';
+                if(!$bSidebar){
+                    $aTmp=stat($oCdn->getLocalfile($sMyLibrary.'/'.$sLibversion));
+                    if ($aTmp && is_array($aTmp)){
+                        $sDateOfDownload=date('Y-m-d H:i', $aTmp['mtime']);
+                    }
+                }
+                $sTable.='<tr'
+                        .($sLibrary===$sMyLibrary ? ' class="current"' : '') 
+                        . '>'
+                    . '<td>'
+                        . ($sLastLibrary!=$sMyLibrary 
+                            ? '<a href="?module=search&action=detail&library='.$sMyLibrary.'&q='.$sLibrarySearch.'" title="Show details for this library"><i class="'.$aIcons['library'].'"></i> '.$sMyLibrary.'</a>'
+                            : ''
+                    )
+                    . '</td>'
+                    . '<td>'
+                    ;
+                
+                if(preg_match('/_in_progress/', $sLibversion)){
+                    $sTable.=''
+                            . '<a href="?module=search&action=download&library='.$sMyLibrary.'&version='.str_replace('_in_progress', '', $sLibversion).'&q='.$sLibrarySearch.'" title="Continue download"><i class="'.$aIcons['version'].'"></i> '.$sLibversion.'</a> '
+                            ;
+                } else {
+                $sTable.=''
+                        . '<a href="?module=search&action=detail&library='.$sMyLibrary.'&version='.$sLibversion.'&q='.$sLibrarySearch.'" title="Show details for this version"><i class="'.$aIcons['version'].'"></i> '.$sLibversion.'</a> '
+                        . ($sLatestVersion && $sLatestVersion===$sLibversion ? '<span class="ok"><i class="'.$aIcons['ok'].'"></i> Up to date</span>' : '')
+                        . ($sLatestVersion && version_compare($sLatestVersion, $sLibversion, '>') ? '<span class="warning"><i class="'.$aIcons['warning'].'"></i> outdated</span> &lt; <i class="'.$aIcons['version'].'"> </i> '.$sLatestVersion.'' : '')
+                        . (!$bSidebar ? '<td>'.$sDateOfDownload.'</td>' : '')
+                        ;
+                }
+                $sLastLibrary=$sMyLibrary;
+            }
+        $sTable.='</td>'
+            . '</tr>';
+    }
     
     $sReturn.=
             ($bSidebar
@@ -172,9 +192,8 @@ function renderLocalLibs($bSidebar=false){
                     ? ''
                     : '<thead><tr>'
                         . '<th>Library</th>'
-                        . (!$bSidebar ? '<th>Date of download</th>' : '')
-                        . ($sLibAction==='checkversion' ? '<th>Latest Version</th>' : '')
                         . '<th>Version</th>'
+                        . (!$bSidebar ? '<th>Date of download</th>' : '')
                     . '</tr></thead>'
                     )
                 . '<tbody>'.$sTable.'</tbody></table>'
@@ -188,6 +207,8 @@ function renderLocalLibs($bSidebar=false){
                 ? ''
                 : '<a href="'.$sUrlRefresh.'" class="button" title="re-read local directories to scan downloaded libs"><i class="'.$aIcons['refresh'].'"></i> Refresh</a><br><br>')
             ;
+    } else {
+        $sReturn='<div id="mylibs">'.$sReturn.'</div>';
     }
     return $sReturn;
 }
@@ -202,6 +223,21 @@ function getQueryparam($sParam, $default=false){
             ? preg_replace('/[^a-zA-Z0-9\ \_\-\.]/', '', $_GET[$sParam])
             : $default
         ;
+}
+
+/**
+ * get html code to show an error message
+ * 
+ * @global array $aIcons
+ * @param string $sMessage  message text
+ * @return string 
+ */
+function showError($sMessage){
+    global $aIcons;
+    return '<br><br><span class="error"><i class="'.$aIcons['error'].'"></i> '
+        . 'PANIC ERROR: '.$sMessage.'</span><br><br><br>'
+        . 'You can try to go <a href="javascript: history.back()">back</a>.<br>'
+        . 'If you feel completely helpless ... here is the safe way <a href="?">home</a> ...';    
 }
 
 // ----------------------------------------------------------------------
@@ -226,7 +262,7 @@ switch ($sModule) {
         break;
     
     case 'search':
-        $sOut.='<div id="mylibs">'.renderLocalLibs(1).'</div>';
+        $sOut.=renderLocalLibs(1);
         $sTryme='';
         if(!$sLibrarySearch && !$sLibrary){
             $sOut.='<h2><i class="'.$aIcons['search'].'"></i> Search</h2>';
@@ -294,14 +330,32 @@ switch ($sModule) {
 
             case 'detail':
                 $aMeta = $oCdn->getLibraryMetadata($sLibrary);
+                if(!$aMeta){
+                    $sOut .= showError('A library named ['.$sLibrary.'] was not found.');
+                    break;
+                }
+                $sOut.='<h2><i class="'.$aIcons['library'].'"></i> ' . $sLibrary 
+                        . ($aLocalLibs && array_key_exists($sLibrary, $aLocalLibs) ? ' <i class="'.$aIcons['marked'].'"></i>' : '')
+                        . '</h2>'
+                        ;
 
                 $sLicence=(is_object($aMeta['license']) ? $aMeta->license : $aMeta['license']);
                 $sAuthor=(is_object($aMeta['author']) ? $aMeta['author']->name : '');
 
                 if (!$sVersion) {
                     $sVersion = $aMeta['version'];
+                } else {
+                    $sOut .= 'version ' . $sVersion.'<br><br>';
                 }
                 $aFiles = $oCdn->getLibraryAssets($sLibrary, $sVersion);
+                if(!$aFiles || !count($aFiles)){
+                    $sOut .= showError('The version ['.$sVersion.'] seems to be wrong (no file was detected).')
+                            . '<br><br><br>'
+                            . '<a href="?module=search&action=detail&library='.$sLibrary.'" class="button">current version of <i class="'.$aIcons['library'].'"></i> <strong>'.$sLibrary.'</strong></a>'
+                            ;
+                    break;
+                }
+                
 
                 $sFirstFile = $sLibrary . '/' . $sVersion . '/' . $aFiles[0];
                 $sDownload = ($oCdn->getLocalfile($sFirstFile)) 
@@ -348,9 +402,6 @@ switch ($sModule) {
                 }
 
                 $sOut .= ''
-                        . '<h2><i class="'.$aIcons['library'].'"></i> ' . $sLibrary 
-                        . ($aLocalLibs && array_key_exists($sLibrary, $aLocalLibs) ? ' <i class="'.$aIcons['marked'].'"></i>' : '')
-                        . '</h2>'
                         . '<h3><i class="'.$aIcons['info'].'"></i> Infos</h3>'
                         . '<p>'
                         . '<strong>'.$aMeta['description'] . '</strong><br><br>'
@@ -423,11 +474,11 @@ switch ($sModule) {
     <style>
         body{background: #304048; 
              background: linear-gradient(#405080, #305060, #102030) fixed; 
-             color: #9bd; font-family: "arial"; margin: 0;}
+             color: #9bd; font-family: verdana,"arial"; margin: 0;}
         a{color:#5ce;}
         a:hover{color:#aff;}
-        h1{background:rgba(0,0,0,0.2); border-radius: 0.5em; color:#a9f; text-shadow: 1px 1px 2px #000, 0 0 0.8em #abc; font-size: 250%; margin: 0; padding: 0.5em;}
-        h2{color:#ae5; font-size: 240%;text-shadow: 1px 1px 0 #000, 0 0 1em #000;}
+        h1{background:rgba(0,0,0,0.2); border-radius: 0.5em 0.5em 0 0 ; color:#a9f; text-shadow: 1px 1px 2px #000, 0 0 0.8em #abc; font-size: 250%; margin: 0; padding: 0.5em;}
+        h2{color:#ae5; font-size: 240%;text-shadow: 1px 1px 0 #000, 0 0 0.7em #000;}
         h3{color:#a6b; font-size: 220%; margin: 1.5em 0 0 0;text-shadow: 1px 1px 0 #000;}
         li{padding: 0.5em; transition: ease-in-out 0.2s;}
         tr:hover,li:hover{background: rgba(255,255,255,0.03)}
@@ -443,14 +494,19 @@ switch ($sModule) {
         nav>ul>li.active{border-top: 2px solid #9c2;}
         pre{background:rgba(0,0,0,0.1); padding: 0.5em;}
         pre>strong{color:#7ac;}
+        
+        table{border-spacing: 0;}
         th{background: rgba(0,0,0,0.1); padding: 1em;}
         td{vertical-align: top;}
-        td{border-bottom: 1px solid #345; padding: 0.4em;}
+        td{border-bottom: 1px solid rgba(255,255,255,0.02); padding: 0.4em;}
+        
         #main{background:rgba(0,0,0,0.1); border-radius: 1em; margin: 2em auto 0; padding: 1em;width: 90%; }
         #footer{background:rgba(255,255,255,0.03); border-radius: 1em; margin: 4em auto 3em; padding: 1em; text-align: center; width: 60%; }
         #mylibs{float: right; background:rgba(0,0,0,0.1); border-radius: 1em; margin: 1em auto; padding: 1em;}
         .hint{padding: 1em;}
+        .info{color:#ec3;}
         .warning{color:#ec3; }
+        .error{background:#422; border: 2px solid; box-shadow: 0 0 2em #a00; color:#e33; margin: 0.5m; padding: 0.5em; }
         .ok{color:#4c4; }
         .fa-star{color:#ec3; }
         .current{background: rgba(0,0,0,0.4); }
