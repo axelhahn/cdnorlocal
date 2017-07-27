@@ -348,9 +348,11 @@ switch ($sModule) {
 
                 if (!$sVersion) {
                     $sVersion = $aMeta['version'];
+                    $sOut .= '(current version: ' . $sVersion.')';
                 } else {
-                    $sOut .= 'version ' . $sVersion.'<br><br>';
+                    $sOut .= '(version ' . $sVersion.')';
                 }
+                $sOut .= '<br><br>';
                 $aFiles = $oCdn->getLibraryAssets($sLibrary, $sVersion);
                 if(!$aFiles || !count($aFiles)){
                     $sOut .= showError('The version ['.$sVersion.'] seems to be wrong (no file was detected).')
@@ -361,7 +363,8 @@ switch ($sModule) {
                 }
                 
 
-                $sFirstFile = $sLibrary . '/' . $sVersion . '/' . $aFiles[0];
+                $sFirstFile=$sLibrary . '/' . $sVersion . '/' . ($aMeta['filename'] ? $aMeta['filename'] : $aFiles[0]);
+                
                 $sDownload = ($oCdn->getLocalfile($sFirstFile)) 
                         ? '<span class="ok">'.getIcon('ok').'Library <strong>'.$sLibrary.' v'.$sVersion.'</strong> was downloaded already.</span><br>see ' . $oCdn->sVendorDir 
                         : ''
@@ -419,6 +422,7 @@ switch ($sModule) {
                         . (!$sLicence ? '<span class="warning">'.getIcon('warning').'Warning: The lience was not detected</span><br><br>': '')
 
                         . getIcon('version').'Latest version: ' . $aMeta['version'] . '<br>'
+                        . '<br><a href="https://cdnjs.com/libraries/'.$sLibrary.'" target="_blank">'.getIcon('linkextern'). ' library '.$sLibrary.' on cdnjs</a><br>'
                         . '</p>'
                         . $sShowVersions
 
@@ -433,10 +437,12 @@ switch ($sModule) {
                         . (count($aFiles) ? ' - ' . implode('<br> - ', $aFiles)
                         . '<br>'
                         . '<h3>'.getIcon('usage').'Usage</h3>'
-                        . 'Example (just guessing and taking the first file):'
+                        . 'Example'
+                        . ($aMeta['filename'] ? '' :' (just guessing - I take the first file from filelist)')
+                        . ':'
                         . '<pre>'
                         . '<strong>'
-                        . '$oCdn = new axelhahn\cdnorlocal([options])<br>'
+                        . '$oCdn = new axelhahn\cdnorlocal()<br>'
                         . 'echo $oCdn->getHtmlInclude(&quot;' . $sFirstFile . '&quot;)'
                         . '</strong><br><br>returns:<br>'
                         . htmlentities($oCdn->getHtmlInclude($sFirstFile))

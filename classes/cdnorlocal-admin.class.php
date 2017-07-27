@@ -75,7 +75,7 @@ class cdnorlocaladmin extends cdnorlocal{
         }
         $aReturn=array();
         $bFound=false;
-        foreach(array('description', 'homepage', 'keywords', 'namespace', 'license', 'version', 'author'/*  */) as $sKey){
+        foreach(array('description', 'homepage', 'keywords', 'namespace', 'license','licenses', 'version', 'author', 'filename'/*  */) as $sKey){
             $aReturn[$sKey]=(isset($this->aLibs[$sLibrary]['_cdn']->$sKey)) ? $this->aLibs[$sLibrary]['_cdn']->$sKey : false;
             $bFound=$bFound || ($aReturn[$sKey]);
         }
@@ -155,7 +155,7 @@ class cdnorlocaladmin extends cdnorlocal{
         $options = array(
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_AUTOREFERER    => true, 
-            CURLOPT_USERAGENT      => 'php curl',
+            CURLOPT_USERAGENT      => 'cdnorlocal downloader (php curl)',
             CURLOPT_HEADER         => false,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_RETURNTRANSFER => true
@@ -394,39 +394,5 @@ class cdnorlocaladmin extends cdnorlocal{
         }
         return $aData;
     }
-    
-    // ----------------------------------------------------------------------
-    // 
-    // rendering
-    // 
-    // ----------------------------------------------------------------------
 
-    /**
-     * render an html table
-     * 
-     * @return string
-     */
-    public function renderTable4Usage(){
-        $sReturn='';
-        $sTable='';
-        
-        $aLocalLibs=$this->getLocalLibs();
-        
-        foreach($aLocalLibs as $sLibrary=>$aVersions){
-            
-            $sTable.='<tr>'
-                    . '<td><a href="?action=detail&library='.$sLibrary.'&q="><i class="fa fa-suitcase"></i> '.$sLibrary.'</td>'
-                    . '<td>'.implode('<br>', $aVersions).'</td>'
-                    . '</tr>';
-        }
-        $sReturn.='<table class="pure-table">'
-                . '<thead><tr>'
-                . '<th>Library</th>'
-                . '<th>Version(s)</th>'
-                . '</tr></thead>'
-                . '<tbody>'.$sTable.'</tbody></table>';
-        return $sReturn;
-    }
-    
-    
 }
