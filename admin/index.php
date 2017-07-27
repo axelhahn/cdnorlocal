@@ -51,6 +51,8 @@ $aIcons=array(
     'ok'=>'fa fa-check',
     'warning'=>'fa fa-warning',
     'error'=>'fa fa-bolt',
+    
+    'linkextern'=>'fa fa-external-link',
 );
 
 
@@ -76,6 +78,10 @@ $aNav=array(
 // functions
 // ----------------------------------------------------------------------
 
+function getIcon($sIndex){
+    global $aIcons;
+    return $sIndex && array_key_exists($sIndex, $aIcons)?'<i class="fa '.$aIcons[$sIndex].'"></i> ':'';
+}
 
 /**
  * get html code for navi with highlighting of the current module
@@ -97,7 +103,7 @@ function renderNavi(){
                     . '<a href="?module='.$sKey.'"'
                         . ' title="'.$aNavitem['descr'].'"'
                     . '>'
-                    . '<i class="'.$aIcons['nav-'.$sKey].'"></i> '
+                    . getIcon('nav-'.$sKey)
                     . ''.$aNavitem['label'].'</a>'
                 . '</li>';
     }
@@ -129,8 +135,8 @@ function renderLocalLibs($bSidebar=false){
         return $bSidebar 
             ? '' 
             : '<p>'
-                . '<span class="info"><i class="'.$aIcons['info'].'"></i> INFO: No downloads so far.</span>'
-                . '<br><br><a href="'.$sUrlRefresh.'" class="button" title="re-read local directories to scan downloaded libs"><i class="'.$aIcons['refresh'].'"></i> Refresh</a>'
+                . '<span class="info">'.getIcon('info').'INFO: No downloads so far.</span>'
+                . '<br><br><a href="'.$sUrlRefresh.'" class="button" title="re-read local directories to scan downloaded libs">'.getIcon('refresh').'Refresh</a>'
                 . '</p>';
     }
 
@@ -156,7 +162,7 @@ function renderLocalLibs($bSidebar=false){
                         . '>'
                     . '<td>'
                         . ($sLastLibrary!=$sMyLibrary 
-                            ? '<a href="?module=search&action=detail&library='.$sMyLibrary.'&q='.$sLibrarySearch.'" title="Show details for this library"><i class="'.$aIcons['library'].'"></i> '.$sMyLibrary.'</a>'
+                            ? '<a href="?module=search&action=detail&library='.$sMyLibrary.'&q='.$sLibrarySearch.'" title="Show details library &quot;'.$sMyLibrary.'&quot;">'.getIcon('library').$sMyLibrary.'</a>'
                             : ''
                     )
                     . '</td>'
@@ -165,13 +171,13 @@ function renderLocalLibs($bSidebar=false){
                 
                 if(preg_match('/_in_progress/', $sLibversion)){
                     $sTable.=''
-                            . '<a href="?module=search&action=download&library='.$sMyLibrary.'&version='.str_replace('_in_progress', '', $sLibversion).'&q='.$sLibrarySearch.'" title="Continue download"><i class="'.$aIcons['version'].'"></i> '.$sLibversion.'</a> '
+                            . '<a href="?module=search&action=download&library='.$sMyLibrary.'&version='.str_replace('_in_progress', '', $sLibversion).'&q='.$sLibrarySearch.'" title="Continue download">'.getIcon('version').$sLibversion.'</a> '
                             ;
                 } else {
                 $sTable.=''
-                        . '<a href="?module=search&action=detail&library='.$sMyLibrary.'&version='.$sLibversion.'&q='.$sLibrarySearch.'" title="Show details for this version"><i class="'.$aIcons['version'].'"></i> '.$sLibversion.'</a> '
-                        . ($sLatestVersion && $sLatestVersion===$sLibversion ? '<span class="ok"><i class="'.$aIcons['ok'].'"></i> Up to date</span>' : '')
-                        . ($sLatestVersion && version_compare($sLatestVersion, $sLibversion, '>') ? '<span class="warning"><i class="'.$aIcons['warning'].'"></i> outdated</span> &lt; <i class="'.$aIcons['version'].'"> </i> '.$sLatestVersion.'' : '')
+                        . '<a href="?module=search&action=detail&library='.$sMyLibrary.'&version='.$sLibversion.'&q='.$sLibrarySearch.'" title="Show details for version '.$sLibversion.' of &quot;'.$sMyLibrary.'&quot;">'.getIcon('version').$sLibversion.'</a> '
+                        . ($sLatestVersion && $sLatestVersion===$sLibversion ? '<span class="ok">'.getIcon('ok').'Up to date</span>' : '')
+                        . ($sLatestVersion && version_compare($sLatestVersion, $sLibversion, '>') ? '<span class="warning">'.getIcon('').'outdated</span> &lt; '.getIcon('version').$sLatestVersion.'' : '')
                         . (!$bSidebar ? '<td>'.$sDateOfDownload.'</td>' : '')
                         ;
                 }
@@ -183,8 +189,8 @@ function renderLocalLibs($bSidebar=false){
     
     $sReturn.=
             ($bSidebar
-                ? '<br><strong><i class="'.$aIcons['download'].'"></i> Downloaded Libraries</strong><br><br>'
-                : '<h2><i class="'.$aIcons['download'].'"></i> Downloaded Libraries</h2>'
+                ? '<br><strong>'.getIcon('download').'Downloaded Libraries</strong><br><br>'
+                : '<h2>'.getIcon('download').'Downloaded Libraries</h2>'
             )
             . ($sTable 
                 ? '<table class="pure-table">'
@@ -198,14 +204,14 @@ function renderLocalLibs($bSidebar=false){
                     )
                 . '<tbody>'.$sTable.'</tbody></table>'
                 . '<br>'
-                . ($sLibAction || $bSidebar ? '': '<a href="'.$sUrlCheck .'" class="button" title="Online check if local versions are still up to date"><i class="'.$aIcons['refresh'].'"></i> Check all versions</a> ')
+                . ($sLibAction || $bSidebar ? '': '<a href="'.$sUrlCheck .'" class="button" title="Online check if local versions are still up to date">'.getIcon('refresh').'Check all versions</a> ')
             : ''
             )
             ;
     if(!$bSidebar){
         $sReturn.=($sLibAction  
                 ? ''
-                : '<a href="'.$sUrlRefresh.'" class="button" title="re-read local directories to scan downloaded libs"><i class="'.$aIcons['refresh'].'"></i> Refresh</a><br><br>')
+                : '<a href="'.$sUrlRefresh.'" class="button" title="re-read local directories to scan downloaded libs">'.getIcon('refresh').'Refresh</a><br><br>')
             ;
     } else {
         $sReturn='<div id="mylibs">'.$sReturn.'</div>';
@@ -228,13 +234,11 @@ function getQueryparam($sParam, $default=false){
 /**
  * get html code to show an error message
  * 
- * @global array $aIcons
  * @param string $sMessage  message text
  * @return string 
  */
 function showError($sMessage){
-    global $aIcons;
-    return '<br><br><span class="error"><i class="'.$aIcons['error'].'"></i> '
+    return '<br><br><span class="error">'.getIcon('error')
         . 'PANIC ERROR: '.$sMessage.'</span><br><br><br>'
         . 'You can try to go <a href="javascript: history.back()">back</a>.<br>'
         . 'If you feel completely helpless ... here is the safe way <a href="?">home</a> ...';    
@@ -265,7 +269,7 @@ switch ($sModule) {
         $sOut.=renderLocalLibs(1);
         $sTryme='';
         if(!$sLibrarySearch && !$sLibrary){
-            $sOut.='<h2><i class="'.$aIcons['search'].'"></i> Search</h2>';
+            $sOut.='<h2>'.getIcon('search').'Search</h2>';
             $sTryme.='<p>
                 You have no idea?!<br>
                 Try one of these ...';
@@ -278,7 +282,7 @@ switch ($sModule) {
                 'player', 
                 'video',
             ) as $sTry){
-                $sTryme.='<a href="?module=search&q='.$sTry.'"><i class="'.$aIcons['search'].'"></i> '.$sTry.'</a> ';
+                $sTryme.='<a href="?module=search&q='.$sTry.'" title="search for &quot;'.$sTry.'&quot;">'.getIcon('search').$sTry.'</a> ';
             }
             $sTryme.='</p>';
         }
@@ -290,7 +294,7 @@ switch ($sModule) {
                 <input type="hidden" name="module" value="search">
                 <input type="hidden" name="action" value="search">
                 <input type="text" size="20" name="q" value="' . $sLibrarySearch . '" autofocus>
-                <button class="search" type="submit" title="search for library"><i class="'.$aIcons['search'].'"></i> search</button> '
+                <button class="search" type="submit" title="search for library">'.getIcon('search').'search</button> '
                 . ($sLibrarySearch ? '<button class="reset" onclick="document.location.href=\'?module=search\'; return false;" title="remove search term">&nbsp;&nbsp;X&nbsp;&nbsp;</button>' : ''
                 ) . '                
             </form>'
@@ -305,16 +309,16 @@ switch ($sModule) {
 
                 if ($sLibrarySearch) {
                     $aSearchResult = $oCdn->searchLibrary($sLibrarySearch);
-                    $sOut .= '<h2><i class="'.$aIcons['ok'].'"></i> Results: ' . $aSearchResult->total . '</h2>';
+                    $sOut .= '<h2>'.getIcon('ok').'Results: ' . $aSearchResult->total . '</h2>';
 
                     if ($aSearchResult->total) {
                         $sOut .= '<ol>';
 
                         foreach ($aSearchResult->results as $aResult) {
                             $sOut .= '<li>'
-                                    . '<strong><i class="'.$aIcons['library'].'"></i> <a href="?module=search&action=detail&library=' . $aResult->name . '&q=' . $sLibrarySearch . '">' . $aResult->name . '</a></strong>'
+                                    . '<strong>'.getIcon('library').'<a href="?module=search&action=detail&library=' . $aResult->name . '&q=' . $sLibrarySearch . '" title="show details for &quot;'.$aResult->name.'&quot;">' . $aResult->name . '</a></strong>'
                                     . ' (' . $aResult->version . ')'
-                                    . ($aLocalLibs && array_key_exists($aResult->name, $aLocalLibs) ? ' <i class="'.$aIcons['marked'].'"></i>' : '')
+                                    . ($aLocalLibs && array_key_exists($aResult->name, $aLocalLibs) ? ' '.getIcon('marked') : '')
                                     . '<br>'
                                     . htmlentities($aResult->description) . '<br>'
                                     . '</li>';
@@ -334,8 +338,8 @@ switch ($sModule) {
                     $sOut .= showError('A library named ['.$sLibrary.'] was not found.');
                     break;
                 }
-                $sOut.='<h2><i class="'.$aIcons['library'].'"></i> ' . $sLibrary 
-                        . ($aLocalLibs && array_key_exists($sLibrary, $aLocalLibs) ? ' <i class="'.$aIcons['marked'].'"></i>' : '')
+                $sOut.='<h2>'.getIcon('library').$sLibrary 
+                        . ($aLocalLibs && array_key_exists($sLibrary, $aLocalLibs) ? ' '.getIcon('marked') : '')
                         . '</h2>'
                         ;
 
@@ -351,7 +355,7 @@ switch ($sModule) {
                 if(!$aFiles || !count($aFiles)){
                     $sOut .= showError('The version ['.$sVersion.'] seems to be wrong (no file was detected).')
                             . '<br><br><br>'
-                            . '<a href="?module=search&action=detail&library='.$sLibrary.'" class="button">current version of <i class="'.$aIcons['library'].'"></i> <strong>'.$sLibrary.'</strong></a>'
+                            . '<a href="?module=search&action=detail&library='.$sLibrary.'" class="button">current version of '.getIcon('library').'<strong>'.$sLibrary.'</strong></a>'
                             ;
                     break;
                 }
@@ -359,17 +363,17 @@ switch ($sModule) {
 
                 $sFirstFile = $sLibrary . '/' . $sVersion . '/' . $aFiles[0];
                 $sDownload = ($oCdn->getLocalfile($sFirstFile)) 
-                        ? '<span class="ok"><i class="'.$aIcons['ok'].'"></i> Library <strong>'.$sLibrary.' v'.$sVersion.'</strong> was downloaded.</span><br>see ' . $oCdn->sVendorDir 
+                        ? '<span class="ok">'.getIcon('ok').'Library <strong>'.$sLibrary.' v'.$sVersion.'</strong> was downloaded already.</span><br>see ' . $oCdn->sVendorDir 
                         : ''
                             . 'Here you can download all files (they are listed below) from CDNJS to your local vendor directory ('.$oCdn->sVendorDir.').<br><br>'
-                            .'<a href="?module=search&action=download&library=' . $sLibrary . '&version=' . $sVersion . '&q='.$sLibrarySearch.'" class="button download"><i class="'.$aIcons['download'].'"></i> Download <strong>'.$sLibrary.'</strong> v'.$sVersion.'</a><br><br>'
-                            . ($aMeta['version'] !== $sVersion ? ' <span class="warning"><i class="'.$aIcons['warning'].'"></i> Warning: This is not the latest version of this library!</span><br>' : '')
-                            . (preg_match('/rc/i', $sVersion) ? ' <span class="warning"><i class="'.$aIcons['warning'].'"></i> Warning: This version is a RELEASE CANDIDATE - not a final version.</span><br>' : '')
-                            . (preg_match('/beta/i', $sVersion) ? ' <span class="warning"><i class="'.$aIcons['warning'].'"></i> Warning: This version is a BETA release - not a final version.</span><br>' : '')
-                            . (preg_match('/alpha/i', $sVersion) ? ' <span class="warning"><i class="'.$aIcons['warning'].'"></i> Warning: This version is an ALPHA release - not a final version.</span><br>' : '')
-                            . (preg_match('/^0\./', $sVersion) ? ' <span class="warning"><i class="'.$aIcons['warning'].'"></i> Warning: This version is a 0.x release - not a final version.</span><br>' : '')
-                            . (count($aFiles)>100 ? ' <span class="warning"><i class="'.$aIcons['warning'].'"></i> Warning: Many files detected. Maybe you need to wait a longer time. On Timeout error: just reload the page to continue downloading still missing files.</span><br>' : '')
-                            . ($oCdn->getLocalfile($sLibrary . '/' . $sVersion.'_in_progress' ) ? ' <span class="warning"><i class="'.$aIcons['warning'].'"></i> Warning: An incomplete download was detected. Clicking on download fetches still missing files.</span><br>' : '')
+                            .'<a href="?module=search&action=download&library=' . $sLibrary . '&version=' . $sVersion . '&q='.$sLibrarySearch.'" class="button download" title="Start download">'.getIcon('download').'Download <strong>'.$sLibrary.'</strong> v'.$sVersion.'</a><br><br>'
+                            . ($aMeta['version'] !== $sVersion ? ' <span class="warning">'.getIcon('warning').'Warning: This is not the latest version of this library!</span><br>' : '')
+                            . (preg_match('/rc/i', $sVersion) ? ' <span class="warning">'.getIcon('warning').'Warning: This version is a RELEASE CANDIDATE - not a final version.</span><br>' : '')
+                            . (preg_match('/beta/i', $sVersion) ? ' <span class="warning">'.getIcon('warning').'Warning: This version is a BETA release - not a final version.</span><br>' : '')
+                            . (preg_match('/alpha/i', $sVersion) ? ' <span class="warning">'.getIcon('warning').'Warning: This version is an ALPHA release - not a final version.</span><br>' : '')
+                            . (preg_match('/^0\./', $sVersion) ? ' <span class="warning">'.getIcon('warning').'Warning: This version is a 0.x release - not a final version.</span><br>' : '')
+                            . (count($aFiles)>100 ? ' <span class="warning">'.getIcon('warning').'Warning: Many files detected. Maybe you need to wait a longer time. On Timeout error: just reload the page to continue downloading still missing files.</span><br>' : '')
+                            . ($oCdn->getLocalfile($sLibrary . '/' . $sVersion.'_in_progress' ) ? ' <span class="warning">'.getIcon('warning').'Warning: An incomplete download was detected. Clicking on download fetches still missing files.</span><br>' : '')
                 ;
 
                 $sShowVersions = '';
@@ -384,51 +388,51 @@ switch ($sModule) {
                             . ($v === $aMeta['version'] ? ' (latest)' : '')
                             . '</option>';
                     }
-                    $sShowVersions .= '<h3><i class="'.$aIcons['version'].'"></i> Versions (' . (count($oCdn->getLibraryVersions($sLibrary))) . ')</h3>'
+                    $sShowVersions .= '<h3>'.getIcon('version').'Versions (' . (count($oCdn->getLibraryVersions($sLibrary))) . ')</h3>'
                         . '<form action="?">'
                         . '<input type="hidden" name="module" value="search">'
                         . '<input type="hidden" name="action" value="detail">'
                         . '<input type="hidden" name="q" value="' . $sLibrarySearch . '">'
                         . '<input type="hidden" name="library" value="' . $sLibrary . '">'
                         . '<select name="version">' . $sOptVersions . '</select>'
-                        . '<button title="switch to the selected version"><i class="'.$aIcons['go'].'"></i> Go</button>'
+                        . '<button title="switch to the selected version">'.getIcon('go').'Go</button>'
                         . '</form>'
                     ;
                 } else {
                     $sShowVersions .= (count($aAllversions)
-                            ? '<h3><i class="'.$aIcons['version'].'"></i> Version</h3><strong>'.$aAllversions[0].'</strong> (this is the only version)'
+                            ? '<h3>'.getIcon('version').'Version</h3><strong>'.$aAllversions[0].'</strong> (this is the only version)'
                             : '<h3>Version seems to be wrong: '.$sVersion.'</h3>'
                             );
                 }
 
                 $sOut .= ''
-                        . '<h3><i class="'.$aIcons['info'].'"></i> Infos</h3>'
+                        . '<h3>'.getIcon('info').'Infos</h3>'
                         . '<p>'
                         . '<strong>'.$aMeta['description'] . '</strong><br><br>'
-                        . '<i class="'.$aIcons['home'].'"></i> Homepage: <a href="' . $aMeta['homepage'] . '" target="_blank">' . $aMeta['homepage'] . '</a><br>'
-                        . (!$aMeta['homepage'] ? '<span class="warning"><i class="'.$aIcons['warning'].'"></i> Warning: This project has no homepage</span><br><br>': '')
+                        . getIcon('home').'Homepage: <a href="' . $aMeta['homepage'] . '" target="_blank">' . $aMeta['homepage'] . '</a><br>'
+                        . (!$aMeta['homepage'] ? '<span class="warning">'.getIcon('warning').'Warning: This project has no homepage</span><br><br>': '')
 
-                        . '<i class="'.$aIcons['author'].'"></i> Author: ' . $sAuthor . '<br>'
-                        . (!$sAuthor ? '<span class="warning"><i class="'.$aIcons['warning'].'"></i> Warning: The author was not detected</span><br><br>': '')
+                        . getIcon('author').'Author: ' . $sAuthor . '<br>'
+                        . (!$sAuthor ? '<span class="warning">'.getIcon('warning').'Warning: The author was not detected</span><br><br>': '')
 
-                        . '<i class="'.$aIcons['license'].'"></i> Licence: ' . $sLicence . '<br>'
-                        . (!$sLicence ? '<span class="warning"><i class="'.$aIcons['warning'].'"></i> Warning: The lience was not detected</span><br><br>': '')
+                        . getIcon('license').'Licence: ' . $sLicence . '<br>'
+                        . (!$sLicence ? '<span class="warning">'.getIcon('warning').'Warning: The lience was not detected</span><br><br>': '')
 
-                        . '<i class="'.$aIcons['version'].'"></i> Latest version: ' . $aMeta['version'] . '<br>'
+                        . getIcon('version').'Latest version: ' . $aMeta['version'] . '<br>'
                         . '</p>'
                         . $sShowVersions
 
-                        . '<h3><i class="'.$aIcons['download'].'"></i> Download</h3>'
+                        . '<h3>'.getIcon('download').'Download</h3>'
                         . $sDownload
 
-                        . '<h3><i class="'.$aIcons['files'].'"></i> Files</h3>'
+                        . '<h3>'.getIcon('files').'Files</h3>'
                         . 'Files (in the version ' . $sVersion
                         . ($sVersion == $aMeta['version'] ? ' [latest]' : '')
                         . '): <strong>' . count($aFiles) . '</strong><br>'
 
                         . (count($aFiles) ? ' - ' . implode('<br> - ', $aFiles)
                         . '<br>'
-                        . '<h3><i class="'.$aIcons['usage'].'"></i> Usage</h3>'
+                        . '<h3>'.getIcon('usage').'Usage</h3>'
                         . 'Example (just guessing and taking the first file):'
                         . '<pre>'
                         . '<strong>'
@@ -525,8 +529,9 @@ switch ($sModule) {
             <div style="clear: both;"></div>
         </div>
         <div id="footer">
-            &copy; 2017 <a href="https://www.axel-hahn.de/" target="_blank">Axel Hahn</a>
-            ... watch my project <a href="https://github.com/axelhahn/cdnorlocal" target="_blank">cdnorlocal on Github</a>
+            &copy; 2017 <a href="https://www.axel-hahn.de/" target="_blank" title="Website of the author (German)"><?php echo getIcon('linkextern')?>Axel Hahn</a>
+            ... watch my project <a href="https://github.com/axelhahn/cdnorlocal" target="_blank" title="Project page on Github"><?php echo getIcon('linkextern')?>cdnorlocal on Github</a>
+            | <a href="https://cdnjs.com/" target="_blank" title="CDN hoster cdnjs"><?php echo getIcon('linkextern')?>cdnjs.com</a>
         </div>
 
     </body>
