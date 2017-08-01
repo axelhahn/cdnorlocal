@@ -16,8 +16,9 @@ And: I wanted to have a tool to check the versions of libraries I use.
 Licence GPL 3.0
 
 author: Axel Hahn
-http://www.axel-hahn.de
-https://github.com/axelhahn/cdnorlocal
+
+DOCS: https://www.axel-hahn.de/docs/cdnorlocal/index.htm
+SOURCE: https://github.com/axelhahn/cdnorlocal
 
 -------------------------------------------------------------------------------
  
@@ -32,12 +33,18 @@ USAGE:
 	require_once('[PATH]/cdnorlocal.class.php');
 	
 	$oCdn = new axelhahn\cdnorlocal();
-	echo $oCdn->getHtmlInclude("jquery/3.2.1/core.js")
+	echo $oCdn->getHtmlInclude("jquery/3.2.1/jquery.min.js")
 
 	It returns:
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/core.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-(2) In a webapp - load css or js fromcdnjs or own domain
+(2) Include a non CSS or JS file ... or customize the <script> or <link> tag.
+	Use the method getFullUrl() to get the url only.
+
+	$oCdn = new axelhahn\cdnorlocal();
+	echo '<script src="'.$oCdn->getFullUrl("jquery/3.2.1/jquery.min.js").'" (...)></script>'
+	
+(3) In a webapp - load css or js fromcdnjs or own domain
     It requires to have a local directory where the libraries are.
 	Default is the url "/vendor" and "[webroot]/vendor".
 	You need to initialize the class with that vendor directory and url if
@@ -48,12 +55,6 @@ USAGE:
 		'vendorurl' => '../vendor'
 	));
 
-(3) Include a non CSS or JS file ... or customize the <script> or <link> tag.
-	Use the method getFullUrl() to get the url only.
-
-	$oCdn = new axelhahn\cdnorlocal();
-	echo '<script src="'.$oCdn->getFullUrl("jquery/3.2.1/core.js").'" (...)></script>'
-	
 (4) Admin webgui
     In the develop environment open the admin in your browser
 	i.e. http://localhost/cdnorlocal/admin/
