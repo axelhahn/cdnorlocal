@@ -14,7 +14,7 @@ namespace axelhahn;
  * 
  * @version 1.0
  * @author Axel Hahn
- * @link http://www.axel-hahn.de
+ * @link https://www.axel-hahn.de
  * @license GPL
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package cdnorlocal
