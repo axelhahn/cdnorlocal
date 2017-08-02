@@ -589,7 +589,8 @@ switch ($sModule) {
         </div>
         <div id="footer">
             &copy; 2017 <a href="https://www.axel-hahn.de/" target="_blank" title="Website of the author (German)"><?php echo getIcon('linkextern')?>Axel Hahn</a>
-            ... watch my project <a href="https://github.com/axelhahn/cdnorlocal" target="_blank" title="Project page on Github"><?php echo getIcon('linkextern')?>cdnorlocal on Github</a>
+            .. <a href="https://www.axel-hahn.de/docs/cdnorlocal/index.htm" target="_blank" title="Docs"><?php echo getIcon('linkextern')?>Docs</a>
+            .. <a href="https://github.com/axelhahn/cdnorlocal" target="_blank" title="Project page on Github"><?php echo getIcon('linkextern')?>Github</a>
             | <a href="https://cdnjs.com/" target="_blank" title="CDN hoster cdnjs"><?php echo getIcon('linkextern')?>cdnjs.com</a>
         </div>
 
