@@ -5,4 +5,5 @@ CDN OR LOCAL :: HISTORY
 2017-07-23  v1.0    first public release
 2017-08-01  docs were published https://www.axel-hahn.de/docs/cdnorlocal/index.htm
 2018-08-01  v1.0.1  added flag in method getLibs() to detect local unuses libs and versions
+2018-10-13  v1.0.2  permission in mkdir (in admin class) were set to 0755 (instead 755)
 -------------------------------------------------------------------------------

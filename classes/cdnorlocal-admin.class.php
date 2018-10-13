@@ -9,7 +9,7 @@ require_once 'cdnorlocal.class.php';
  * admin functions to request API, download, read existing local downloads
  * This file is needed by admin/index.php only - NOT in your projects to publish
  *
- * @version 1.0
+ * @version 1.0.2
  * @author Axel Hahn
  * @link https://www.axel-hahn.de
  * @license GPL
@@ -317,7 +317,7 @@ class cdnorlocaladmin extends cdnorlocal{
             $sFileId=$aItem['file'];
 
             if(!is_dir(dirname($sLocalfile))){
-                mkdir(dirname($sLocalfile), 755, 1);
+                mkdir(dirname($sLocalfile), 0755, 1);
             }
 
             // Add initialized cURL object to array
@@ -382,7 +382,7 @@ class cdnorlocaladmin extends cdnorlocal{
         $this->_wd(__METHOD__ . "($sLibrary)");
         $sJsonfile=$this->_getInfoFilename($sLibrary);
         if(!is_dir(dirname($sJsonfile))){
-            mkdir(dirname($sJsonfile), 755, 1);
+            mkdir(dirname($sJsonfile), 0755, 1);
         }
         return file_put_contents($sJsonfile, json_encode($this->aLibs[$sLibrary]));
     }
