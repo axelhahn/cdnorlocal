@@ -12,7 +12,7 @@ namespace axelhahn;
  * $oCdn->new axelhahn\cdnorlocal();
  * echo $oCdn->getHtmlInclude("jquery/3.2.1/jquery.min.js");
  * 
- * @version 1.0.1
+ * @version 1.0.2
  * @author Axel Hahn
  * @link https://www.axel-hahn.de
  * @license GPL
@@ -227,7 +227,7 @@ class cdnorlocal {
                 $sMyLib=basename($sDir);
                 foreach(glob($this->sVendorDir.'/'.$sMyLib.'/*') as $sVersiondir){
                     $sMyVersion=basename($sVersiondir);
-                    if(!$aReturn[$sMyLib.'/'.$sMyVersion]){
+                    if(!isset($aReturn[$sMyLib.'/'.$sMyVersion]) || $aReturn[$sMyLib.'/'.$sMyVersion]){
                         $aReturn[$sMyLib.'/'.$sMyVersion]=array(
                             'lib'=>$sMyLib,
                             'version'=>$sMyVersion,
