@@ -12,7 +12,7 @@ namespace axelhahn;
  * $oCdn->new axelhahn\cdnorlocal();
  * echo $oCdn->getHtmlInclude("jquery/3.2.1/jquery.min.js");
  * 
- * @version 1.0.2
+ * @version 1.0.3
  * @author Axel Hahn
  * @link https://www.axel-hahn.de
  * @license GPL
@@ -233,7 +233,7 @@ class cdnorlocal {
                             'version'=>$sMyVersion,
                             'relpath' => $sMyLib.'/'.$sMyVersion,
                             'islocal'=>1,
-                            'isunused'=>1,
+                            'isunused'=>!isset($this->_aLibs[$sMyLib.'/'.$sMyVersion]),
                         );
                     }
                 }
