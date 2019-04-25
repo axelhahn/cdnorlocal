@@ -7,4 +7,5 @@ CDN OR LOCAL :: HISTORY
 2018-08-01  v1.0.1  added flag in method getLibs() to detect local unuses libs and versions
 2018-10-13  v1.0.2  permission in mkdir (in admin class) were set to 0755 (instead 755)
 2019-03-30  v1.0.3  fix isunused value in getLibs()
+2019-04-25  v1.0.5  added method getFilteredLibs() to detect used unused or local files
 -------------------------------------------------------------------------------
