@@ -22,7 +22,7 @@ namespace axelhahn;
  * AND/ OR
  * https://unpkg.com/
  * 
- * @version 1.0.7
+ * @version 1.0.8
  * @author Axel Hahn
  * @link https://www.axel-hahn.de
  * @license GPL

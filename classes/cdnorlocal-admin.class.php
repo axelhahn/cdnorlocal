@@ -9,7 +9,7 @@ require_once 'cdnorlocal.class.php';
  * admin functions to request API, download, read existing local downloads
  * This file is needed by admin/index.php only - NOT in your projects to publish
  *
- * @version 1.0.6
+ * @version 1.0.8
  * @author Axel Hahn
  * @link https://www.axel-hahn.de
  * @license GPL
@@ -551,7 +551,14 @@ class cdnorlocaladmin extends cdnorlocal{
     // 
     // ----------------------------------------------------------------------
 
-    
+    // Comparison function
+	protected function _orderByNewestVersion($a, $b) {
+		$this->_wd(__METHOD__ . "($a, $b)");
+		if ($a == $b) {
+			return 0;
+		}
+		return version_compare($a, $b,'<');
+	}
 
     /**
      * get an array with all downloaded libs and its versions
@@ -571,6 +578,10 @@ class cdnorlocaladmin extends cdnorlocal{
         if(!$aData || !is_array($aData) || !count($aData)){
             return false;
         }
+		foreach($aData as $sLib=>$aVersions){
+			uasort($aVersions, array($this, '_orderByNewestVersion'));
+			$aData[$sLib]=$aVersions;
+		}
         return $aData;
     }
     // ----------------------------------------------------------------------
