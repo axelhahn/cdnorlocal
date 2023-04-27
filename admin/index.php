@@ -31,21 +31,21 @@ $sVersion = getQueryparam('version');
 $aIcons=array(
     
     'nav-search'=>'fa fa-globe',
-    'nav-browse'=>'fa fa-folder-open-o',
+    'nav-browse'=>'fa fa-folder-open',
     
     'home'=>'fa fa-home',
     'search'=>'fa fa-search',
     'download'=>'fa fa-download',
     'info'=>'fa fa-info-circle',
     'author'=>'fa fa-user',
-    'license'=>'fa fa-file-o',
+    'license'=>'fa fa-file',
     'keyword'=>'fa fa-tag',
     'keywords'=>'fa fa-tags',
     'library'=>'fa fa-suitcase',
     'marked'=>'fa fa-star',
     'version'=>'fa fa-flag',
     'files'=>'fa fa-file',
-    'usage'=>'fa fa-hand-o-right',
+    'usage'=>'fa-solid fa-hand-point-right',
     
     'go'=>'fa fa-check',
     'refresh'=>'fa fa-refresh',
@@ -575,7 +575,9 @@ switch ($sModule) {
     </style>
     <?php
         // echo $oCdn->getHtmlInclude('jquery/jquery.min.js');
-        echo $oCdn->getHtmlInclude('font-awesome/4.7.0/css/font-awesome.min.css');
+        // echo $oCdn->getHtmlInclude('font-awesome/4.7.0/css/font-awesome.min.css');
+        echo $oCdn->getHtmlInclude('font-awesome/6.4.0/css/all.min.css');
+        
     ?>
     </head>
     <body>
