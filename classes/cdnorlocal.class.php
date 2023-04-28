@@ -22,7 +22,7 @@ namespace axelhahn;
  * AND/ OR
  * https://unpkg.com/
  * 
- * @version 1.0.8
+ * @version 1.0.9
  * @author Axel Hahn
  * @link https://www.axel-hahn.de
  * @license GPL
@@ -30,7 +30,9 @@ namespace axelhahn;
  * @package cdnorlocal
  */
 class cdnorlocal {
-    
+
+    protected $sVersion='1.0.9';
+
     /**
      * flag to show debugging infos (used in _wd method [write debug])
      * @var boolean
@@ -54,7 +56,12 @@ class cdnorlocal {
      * url prefix of CDNJS
      * @var string
      */
-    var $sCdnUrl='https://cdnjs.cloudflare.com/ajax/libs';
+    // var $sCdnUrl='https://cdnjs.cloudflare.com/ajax/libs';
+
+    /**
+     * url prefix of CDNs
+     * @var string
+     */
     var $aCdnUrls=array(
         'cdnjs.cloudflare.com'=>array(
             'about'=>'',
@@ -321,7 +328,7 @@ class cdnorlocal {
         $this->_wd(__METHOD__ . "()");
         $aReturn=$this->_aLibs;
         if($bDetectUnused){
-            foreach(glob($this->sVendorDir.'/*') as $sDir){
+                foreach(glob($this->sVendorDir.'/*') as $sDir){
                 $sMyLib=basename($sDir);
                 foreach(glob($this->sVendorDir.'/'.$sMyLib.'/*') as $sVersiondir){
                     $sMyVersion=basename($sVersiondir);
@@ -372,6 +379,10 @@ class cdnorlocal {
      */
     public function getLibRelpath($sLib){
         return $this->_getLibItem('lib', $sLib, 'relpath');
+    }
+
+    public function getVersion(){
+        return $this->sVersion;
     }
     /**
      * set an array of lib items to the lib 
@@ -459,14 +470,22 @@ class cdnorlocal {
      * @param string $sRelUrl  relative url of css/ js file (i.e. "jquery/3.2.1/jquery.min.js")
      * @return string
      */
-    function getHtmlInclude($sRelUrl){
+    function getHtmlInclude($sRelUrl, $sCecksum=''){
         $sUrl=$this->getFullUrl($sRelUrl);
         $ext = pathinfo($sRelUrl, PATHINFO_EXTENSION);
+
+        $sSecurity=($sCecksum ? 'integrity="'.$sCecksum.'" ' : '') 
+            .'crossorigin="anonymous" referrerpolicy="no-referrer"'
+            ;
         switch ($ext){
             case 'css': 
-                return '<link rel="stylesheet" type="text/css" href="'.$sUrl.'">';
+                return '<link rel="stylesheet" type="text/css" href="'.$sUrl.'" '
+                    . $sSecurity
+                    .' />';
             case 'js': 
-                return '<script src="'.$sUrl.'"></script>';
+                return '<script src="'.$sUrl.'" '
+                    . $sSecurity
+                    .'></script>';
             default:
                 return "<!-- ERROR: I don't know (yet) how to handle extension [$ext] ... to include $sRelUrl; You can use getFullUrl('$sRelUrl'); -->";
         }

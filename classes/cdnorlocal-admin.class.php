@@ -9,7 +9,7 @@ require_once 'cdnorlocal.class.php';
  * admin functions to request API, download, read existing local downloads
  * This file is needed by admin/index.php only - NOT in your projects to publish
  *
- * @version 1.0.8
+ * @version 1.0.9
  * @author Axel Hahn
  * @link https://www.axel-hahn.de
  * @license GPL
@@ -119,6 +119,7 @@ class cdnorlocaladmin extends cdnorlocal{
             $this->_wd(__METHOD__ . "($sLibrary) no _cdn");
             return false;
         }
+        // echo '<pre>'; print_r($this->aLibs[$sLibrary]); die();
         return true;
     }
     
@@ -136,15 +137,13 @@ class cdnorlocaladmin extends cdnorlocal{
             $sVersion=$this->getLibraryLatestVersion($sLibrary);
         }
         $this->_wd(__METHOD__ . ' version: '. $sVersion);
-        if ($this->aLibs[$sLibrary]['_cdn']){
-            
-            foreach ($this->aLibs[$sLibrary]['_cdn']->assets as $aAsset){
-                if($aAsset->version === $sVersion){
-                    return $aAsset->files;
-                }
-            }
-        }
-        return false;
+
+        $sApiUrl=sprintf($this->sUrlApiPackage, "$sLibrary/$sVersion/");
+        $this->_wd(__METHOD__ . "($sLibrary) fetch $sApiUrl");
+        $aJson=json_decode(file_get_contents($sApiUrl), 1);
+        // echo '<pre>'.print_r($aJson, 1).'</pre>';
+        
+        return $aJson['files'];
     }
     
     /**
@@ -252,10 +251,10 @@ class cdnorlocaladmin extends cdnorlocal{
         $aReturn=array();
         if ($this->aLibs[$sLibrary]['_cdn']){
             $iCount=0;
-            foreach ($this->aLibs[$sLibrary]['_cdn']->assets as $aAsset){
+            foreach ($this->aLibs[$sLibrary]['_cdn']->versions as $sVersion){
                 $iCount++;
                 if (!$iMax || $iCount<=$iMax){
-                    $aReturn[]=$aAsset->version;
+                    array_unshift($aReturn , $sVersion);
                 }
             }
         }
