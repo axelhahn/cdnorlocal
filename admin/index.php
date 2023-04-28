@@ -144,8 +144,16 @@ function renderLocalLibs($bSidebar=false){
     if(!$aLocalLibs || !count($aLocalLibs)){
         return $bSidebar 
             ? '' 
-            : '<p>'
-                . '<span class="info">'.getIcon('info').'INFO: No downloads so far.</span>'
+            : '<h2>Welcome!</h2>'
+                .'<p>'
+                .'Here you will see all downloaded packages and their versions.<br>'
+                .'You get an information if a library has an update.<br>'
+                .'You can download newer versions or delete any library.<br>'
+                .'<br>'
+                . '<span class="info">'.getIcon('info').'INFO: No downloads so far.</span><br>'
+                .'<br>'
+                .'Go to the tab "API search" to find a library and download it.<br>'
+                .'<br>'
                 . '<br><br><a href="'.$sUrlRefresh.'" class="button" title="re-read local directories to scan downloaded libs">'.getIcon('refresh').'Refresh</a>'
                 . '</p>';
     }
@@ -200,7 +208,7 @@ function renderLocalLibs($bSidebar=false){
                             . ($sLatestVersion && $sLatestVersion===$sLibversion ? '<span class="ok">'.getIcon('ok').'Up to date</span>' : '')
                             . ($sLatestVersion && version_compare($sLatestVersion, $sLibversion, '>') ? '<span class="warning">'.getIcon('warning').'outdated</span>' : '')
                             .'</td>'
-                            . '<td>'.($sLatestVersion===$sLibversion ? '' : getIcon('version').$sLatestVersion).'</td>'
+                            . '<td>'.($sLatestVersion===$sLibversion ? '' : '<a href="?module=search&action=detail&library='.$sMyLibrary.'&version='.$sLibversion.'&q='.$sLibrarySearch.'" title="Show details for latest version '.$sLatestVersion.' of &quot;'.$sMyLibrary.'&quot;">'.getIcon('version').$sLatestVersion.'</a>').'</td>'
                             . '<td>'.$sDateOfDownload.'</td>'
                             . '<td>'.$sBtnDelete.'</a> </td>'
                          : ''
@@ -278,6 +286,14 @@ function showError($sMessage){
         . 'If you feel completely helpless ... here is the safe way <a href="?" class="button">'.getIcon('home').'home</a> ...';    
 }
 
+function showTableRow($sCol1, $sCol2, $sError=false){
+    return '<tr>
+        '.($sError
+            ? '<td colspan="2"><span class="warning">'.getIcon('warning').'Warning: '.$sError.'</span></td>'
+            : '<td>'.$sCol1.'</td><td>'.$sCol2.'</td>'
+        ).'
+    </tr>';
+}
 
 // ----------------------------------------------------------------------
 // handle actions
@@ -375,9 +391,7 @@ switch ($sModule) {
                 if (!$sVersion) {
                     $sVersion = $oCdn->getLibraryLatestVersion($sLibrary);
                 } else {
-                    $sOut .= '(version ' . $sVersion
-                            . ($sVersion!=$oCdn->getLibraryLatestVersion($sLibrary) ? ' not current' : ' latest')
-                            . ')';
+                    $sOut .= '(version ' . $sVersion. ')';
                 }
                 $aFiles = $oCdn->getLibraryAssets($sLibrary, $sVersion);
                 if(!$aFiles || !count($aFiles)){
@@ -392,16 +406,17 @@ switch ($sModule) {
                 $sFirstFile=$sLibrary . '/' . $sVersion . '/' . ($oCdn->getLibraryFilename($sLibrary) ? $oCdn->getLibraryFilename($sLibrary) : $aFiles[0]);
                 
                 $sDownload = ($oCdn->getLocalfile($sFirstFile)) 
-                        ? '<span class="ok">'.getIcon('ok').'Library <strong>'.$sLibrary.' v'.$sVersion.'</strong> was downloaded already.</span><br>see ' . $oCdn->sVendorDir 
+                        ? '<span class="ok">'.getIcon('ok').'Library <strong>'.$sLibrary.' v'.$sVersion.'</strong> was downloaded already.</span><br>see ' . $oCdn->sVendorDir.'<br>'
+                            . ($sVersion!=$oCdn->getLibraryLatestVersion($sLibrary) ? '<br><span class="warning">'.getIcon('warning').'Update available. Version '.$oCdn->getLibraryLatestVersion($sLibrary).' is the latest.</span>' : '')
                         : ''
                             . 'Here you can download all files (they are listed below) from CDNJS to your local vendor directory ('.$oCdn->sVendorDir.').<br><br>'
                             .'<a href="?module=search&action=download&library=' . $sLibrary . '&version=' . $sVersion . '&q='.$sLibrarySearch.'" class="button download" title="Start download">'.getIcon('download').'Download <strong>'.$sLibrary.'</strong> v'.$sVersion.'</a><br><br>'
-                            . ($oCdn->getLibraryLatestVersion($sLibrary) !== $sVersion ? ' <span class="warning">'.getIcon('warning').'Warning: This is not the latest version of this library!</span><br>' : '')
+                            . ($sVersion!=$oCdn->getLibraryLatestVersion($sLibrary) ? '<br><span class="warning">'.getIcon('warning').'Update available. Version '.$oCdn->getLibraryLatestVersion($sLibrary).' is the latest.</span>' : '')
                             . (preg_match('/rc/i', $sVersion) ? ' <span class="warning">'.getIcon('warning').'Warning: This version is a RELEASE CANDIDATE - not a final version.</span><br>' : '')
                             . (preg_match('/beta/i', $sVersion) ? ' <span class="warning">'.getIcon('warning').'Warning: This version is a BETA release - not a final version.</span><br>' : '')
                             . (preg_match('/alpha/i', $sVersion) ? ' <span class="warning">'.getIcon('warning').'Warning: This version is an ALPHA release - not a final version.</span><br>' : '')
                             . (preg_match('/^0\./', $sVersion) ? ' <span class="warning">'.getIcon('warning').'Warning: This version is a 0.x release - not a final version.</span><br>' : '')
-                            . (count($aFiles)>100 ? ' <span class="warning">'.getIcon('warning').'Warning: Many ('.count($aFiles).') files detected. Maybe you need to wait a longer time. On Timeout error: just reload the page to continue downloading still missing files.</span><br>' : '')
+                            . (count($aFiles)>200 ? ' <span class="warning">'.getIcon('warning').'Warning: Many ('.count($aFiles).') files detected. Maybe you need to wait a longer time. On Timeout error: just reload the page to continue downloading still missing files.</span><br>' : '')
                             . ($oCdn->getLocalfile($sLibrary . '/' . $sVersion.'_in_progress' ) ? ' <span class="warning">'.getIcon('warning').'Warning: An incomplete download was detected. Clicking on download fetches still missing files.</span><br>' : '')
                 ;
 
@@ -449,29 +464,30 @@ switch ($sModule) {
                           )
                         .'<br><br>'
                         
-                        . ($oCdn->getLibraryHomepage($sLibrary)
-                                ? getIcon('home').'Homepage: <a href="' . $oCdn->getLibraryHomepage($sLibrary) . '" target="_blank">' . $oCdn->getLibraryHomepage($sLibrary) . '</a>'
-                                : '<span class="warning">'.getIcon('warning').'Warning: This project has no homepage</span><br>'
-                          )
-                        .'<br>'
-                        
-                        . ($oCdn->getLibraryAuthor($sLibrary)
-                                ? getIcon('author').'Author: ' . $oCdn->getLibraryAuthor($sLibrary)
-                                : '<span class="warning">'.getIcon('warning').'Warning: The author was not detected</span><br>'
-                          )
-                        .'<br>'
+                        .'<table>'
+                            . showTableRow(
+                                getIcon('home').'Homepage:', 
+                                '<a href="' . $oCdn->getLibraryHomepage($sLibrary) . '" target="_blank">' . $oCdn->getLibraryHomepage($sLibrary) . '</a>',
+                                !$oCdn->getLibraryHomepage($sLibrary) ? 'This project has no homepage' : ''
+                                )
+                            . showTableRow(
+                                getIcon('author').'Author:',
+                                $oCdn->getLibraryAuthor($sLibrary),
+                                !$oCdn->getLibraryAuthor($sLibrary) ? 'The author was not detected' : ''
+                                )
+                            . showTableRow(
+                                getIcon('license').'License(s):',
+                                implode(' | ', $oCdn->getLibraryLicenses($sLibrary)),
+                                !$oCdn->getLibraryLicenses($sLibrary) ? 'The license was not detected' : ''
+                                )
+            
+                            . showTableRow(
+                                getIcon('version').'Latest version:',
+                                $oCdn->getLibraryLatestVersion($sLibrary),
+                                !$oCdn->getLibraryLatestVersion($sLibrary) ? 'No version was detected' : ''
+                                )
+                        .'</table>'
 
-                        . ($oCdn->getLibraryLicenses($sLibrary)
-                                ? getIcon('license').'License(s): ' . implode(' | ', $oCdn->getLibraryLicenses($sLibrary))
-                                : '<span class="warning">'.getIcon('warning').'Warning: The license was not detected</span><br>'
-                          )
-                        .'<br>'
-
-
-                        . ($oCdn->getLibraryLatestVersion($sLibrary)
-                                ? getIcon('version').'Latest version: ' . $oCdn->getLibraryLatestVersion($sLibrary) . '<br>'
-                                : '<span class="warning">'.getIcon('warning').'Warning: No version was detected</span><br>'
-                          )
 
                         . '<br><a href="https://cdnjs.com/libraries/'.$sLibrary.'" target="_blank">'.getIcon('linkextern'). ' cdnjs.com: '.$sLibrary.'</a><br>'
                         . '</p>'
@@ -536,7 +552,8 @@ switch ($sModule) {
              color: #9bd; font-family: verdana,"arial"; margin: 0;}
         a{color:#5ce;}
         a:hover{color:#aff;}
-        h1{background:rgba(0,0,0,0.2); border-radius: 0.5em 0.5em 0 0 ; color:#a9f; text-shadow: 1px 1px 2px #000, 0 0 0.8em #abc; font-size: 250%; margin: 0; padding: 0.5em;}
+        h1{background:rgba(0,0,0,0.2); border-radius: 0.3em 0.3em 0 0 ; color:#a9f; text-shadow: 1px 1px 2px #000, 0 0 0.8em #abc; font-size: 250%; margin: 0; padding: 0.5em;}
+        h1 span{font-size: 50%;}
         h2{color:#ae5; font-size: 240%;text-shadow: 1px 1px 0 #000, 0 0 0.7em #000;}
         h3{color:#a6b; font-size: 220%; margin: 1.5em 0 0 0;text-shadow: 1px 1px 0 #000;}
         li{padding: 0.5em; transition: ease-in-out 0.2s;}
@@ -582,7 +599,7 @@ switch ($sModule) {
     </head>
     <body>
         <div id="main">
-            <h1>CDN OR LOCAL :: admin</h1>
+            <h1>CDN OR LOCAL :: admin <span>v<?php echo $oCdn->getVersion() ?></span></h1>
 
             <?php 
                 echo renderNavi().$sOut; 
@@ -590,7 +607,7 @@ switch ($sModule) {
             <div style="clear: both;"></div>
         </div>
         <div id="footer">
-            &copy; 2017 - <?php echo date('Y')?> <a href="https://www.axel-hahn.de/" target="_blank" title="Website of the author (German)"><?php echo getIcon('linkextern')?>Axel Hahn</a>
+            &copy; 2017 - <?php echo date('Y')?> .. <a href="https://www.axel-hahn.de/" target="_blank" title="Website of the author (German)"><?php echo getIcon('linkextern')?>Axel Hahn</a>
             .. <a href="https://www.axel-hahn.de/docs/cdnorlocal/index.htm" target="_blank" title="Docs"><?php echo getIcon('linkextern')?>Docs</a>
             .. <a href="https://github.com/axelhahn/cdnorlocal" target="_blank" title="Project page on Github"><?php echo getIcon('linkextern')?>Github</a>
             | <a href="https://cdnjs.com/" target="_blank" title="CDN hoster cdnjs"><?php echo getIcon('linkextern')?>cdnjs.com</a>
