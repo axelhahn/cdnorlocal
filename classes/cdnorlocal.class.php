@@ -22,7 +22,7 @@ namespace axelhahn;
  * AND/ OR
  * https://unpkg.com/
  * 
- * @version 1.0.9
+ * @version 1.0.10
  * @author Axel Hahn
  * @link https://www.axel-hahn.de
  * @license GPL
@@ -31,7 +31,7 @@ namespace axelhahn;
  */
 class cdnorlocal {
 
-    protected $sVersion='1.0.9';
+    protected $sVersion='1.0.10';
 
     /**
      * flag to show debugging infos (used in _wd method [write debug])
@@ -44,6 +44,12 @@ class cdnorlocal {
      * @var string
      */
     var $sVendorDir=false;
+
+    /**
+     * local vendor dir ... if a lib was downloaded with admin
+     * @var string
+     */
+    var $sCdnMetadir='.cdnmetadata';
     
     /**
      * local vendor url ... if a lib was downloaded with admin
@@ -148,7 +154,20 @@ class cdnorlocal {
     protected function _getLocalfilename($sRelUrl){
         return $this->sVendorDir.'/'.$sRelUrl;
     }
-    
+    /**
+     * get a filename for a json info file to store metadata of a single library
+     * 
+     * @param  string  $sLibAndVersion  name of library + version, eg "jquery__3.6.4"
+     * @return string
+     */
+    protected function _getLibMetaFile($sLibAndVersion){
+        $sDir=$this->_getLocalfilename('').'/'.$this->sCdnMetadir;
+        if(!is_dir($sDir)){
+            mkdir($sDir);
+        }
+        return $sDir.'/'.$sLibAndVersion.'.json';
+    }
+
     /**
      * return the local filename if it exists
      * 
@@ -407,16 +426,24 @@ class cdnorlocal {
     // 
     // ----------------------------------------------------------------------
     
+    /**
+     * get array with parts from a relurl
+     * - package
+     * - version
+     * - file (relative to lib root)
+     * - part of filename for metadata
+     */
     protected function _splitRelUrl($sRelUrl){
         $aTmp= preg_match_all('#^(.*)/(.*)/(.*)$#U', $sRelUrl, $aMatches);
         if(!count($aMatches)===4){
             return false;
         }
-        return array(
-            'pkg'=>$aMatches[1][0],
-            'version'=>$aMatches[2][0],
-            'file'=>$aMatches[3][0],
-        );
+        return [
+            'pkg'      => $aMatches[1][0],
+            'version'  => $aMatches[2][0],
+            'file'     => $aMatches[3][0],
+            'metafile' => $aMatches[1][0].'__'.$aMatches[2][0], // pkg + __ + version
+        ];
     }
     
     public function getFullCdnUrl($sRelUrl, $sCdn=false){
@@ -473,6 +500,20 @@ class cdnorlocal {
     function getHtmlInclude($sRelUrl, $sCecksum=''){
         $sUrl=$this->getFullUrl($sRelUrl);
         $ext = pathinfo($sRelUrl, PATHINFO_EXTENSION);
+        if(!$sCecksum){
+            $aInfos=$this->_splitRelUrl($sRelUrl);
+            $sLibAndVersion=$aInfos['metafile'];
+
+            $sLibCachefile=$this->_getLibMetaFile($sLibAndVersion);
+            if(file_exists($sLibCachefile)){
+                // extract filename in the lib
+                // $sRelfileInLib=str_replace($sLibAndVersion.'/', '', $sRelUrl);
+                $sRelfileInLib=$aInfos['file'];
+                // echo "$sLibCachefile exists<br>";
+                $aVersionMetadata=json_decode(file_get_contents($sLibCachefile), 1);
+                $sCecksum=isset($aVersionMetadata['sri'][$sRelfileInLib]) ? $aVersionMetadata['sri'][$sRelfileInLib] : '';
+            }
+        }
 
         $sSecurity=($sCecksum ? 'integrity="'.$sCecksum.'" ' : '') 
             .'crossorigin="anonymous" referrerpolicy="no-referrer"'

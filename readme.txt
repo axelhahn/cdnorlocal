@@ -33,16 +33,16 @@ USAGE:
 	require_once('[PATH]/cdnorlocal.class.php');
 	
 	$oCdn = new axelhahn\cdnorlocal();
-	echo $oCdn->getHtmlInclude("jquery/3.2.1/jquery.min.js")
+	echo $oCdn->getHtmlInclude("jquery/3.6.4/jquery.min.js")
 
 	It returns:
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" (...)></script>
 
 (2) Include a non CSS or JS file ... or customize the <script> or <link> tag.
 	Use the method getFullUrl() to get the url only.
 
 	$oCdn = new axelhahn\cdnorlocal();
-	echo '<script src="'.$oCdn->getFullUrl("jquery/3.2.1/jquery.min.js").'" (...)></script>'
+	echo '<script src="'.$oCdn->getFullUrl("jquery/3.6.4/jquery.min.js").'" (...)></script>'
 	
 (3) In a webapp - load css or js fromcdnjs or own domain
     It requires to have a local directory where the libraries are.

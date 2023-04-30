@@ -2,13 +2,15 @@
 
 CDN OR LOCAL :: HISTORY
 
-2017-07-23  v1.0    first public release
+2017-07-23  v1.0     first public release
 2017-08-01  docs were published https://www.axel-hahn.de/docs/cdnorlocal/index.htm
-2018-08-01  v1.0.1  added flag in method getLibs() to detect local unuses libs and versions
-2018-10-13  v1.0.2  permission in mkdir (in admin class) were set to 0755 (instead 755)
-2019-03-30  v1.0.3  fix isunused value in getLibs()
-2019-04-25  v1.0.5  added method getFilteredLibs() to detect used unused or local files
-2019-05-??  v1.0.6  prepareations to use multiple CDN hosters
-2019-05-17  v1.0.7  replace array_first_key for more backward compatibility
-2019-11-23  v1.0.8  sortorder of versions per library is now newest to lowest version
+2018-08-01  v1.0.1   added flag in method getLibs() to detect local unuses libs and versions
+2018-10-13  v1.0.2   permission in mkdir (in admin class) were set to 0755 (instead 755)
+2019-03-30  v1.0.3   fix isunused value in getLibs()
+2019-04-25  v1.0.5   added method getFilteredLibs() to detect used unused or local files
+2019-05-??  v1.0.6   prepareations to use multiple CDN hosters
+2019-05-17  v1.0.7   replace array_first_key for more backward compatibility
+2019-11-23  v1.0.8   sortorder of versions per library is now newest to lowest version
+2023-04-28  v1.0.9   update becaue of change in CDNJS API --> see https://github.com/cdnjs/cdnjs/issues/14140
+2023-04-30  v1.0.10  move cache file to [vendor]/.cdndata; add checksums in getHtmlInclude()
 -------------------------------------------------------------------------------

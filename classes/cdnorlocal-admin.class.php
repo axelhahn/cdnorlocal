@@ -9,7 +9,7 @@ require_once 'cdnorlocal.class.php';
  * admin functions to request API, download, read existing local downloads
  * This file is needed by admin/index.php only - NOT in your projects to publish
  *
- * @version 1.0.9
+ * @version 1.0.10
  * @author Axel Hahn
  * @link https://www.axel-hahn.de
  * @license GPL
@@ -25,35 +25,12 @@ class cdnorlocaladmin extends cdnorlocal{
     var $sUrlApiPackage='https://api.cdnjs.com/libraries/%s';
 
     var $aLibs=array();
-    
-    /**
-     * ttl in sec; 3600 is 1 hour
-     * @var integer 
-     */
-    var $iTtl=3600;
-    
+        
     // ----------------------------------------------------------------------
     // 
     // API requests
     // 
     // ----------------------------------------------------------------------
-
-
-    /**
-     * read local cache file with metadata of a library
-     * 
-     * @param string  $sLibrary  name of the library
-     * @return array
-     */
-    protected function _getLibraryMetadataFromCache($sLibrary){
-        $sLibCachefile=$this->_getInfoFilename($sLibrary);
-        if(file_exists($sLibCachefile) && filemtime($sLibCachefile)>(date("U") - $this->iTtl)){
-            $this->_wd(__METHOD__ . "($sLibrary) using cache $sLibCachefile - ".date("d.m.Y H:i:s", filemtime($sLibCachefile)));
-            $aJson2=json_decode(file_get_contents($sLibCachefile));
-            return $aJson2->_cdn;
-        }
-        return false;
-    }
     
     /**
      * helper function - get an alement from API return
@@ -62,17 +39,17 @@ class cdnorlocaladmin extends cdnorlocal{
      * @param string  $sElement  item to read, i.e. description|homepage|author|...
      */
     protected function _getLibraryElement($sLibrary, $sElement) {
-        $this->_wd(__METHOD__ . "($sLibrary, $sElement)");
+        // $this->_wd(__METHOD__ . "($sLibrary, $sElement)");
         if(!isset($this->aLibs[$sLibrary]['_cdn'])){
             $this->getLibraryMetadata($sLibrary);
         }
 
         if (isset($this->aLibs[$sLibrary]['_cdn']->$sElement)){
-            $this->_wd(__METHOD__ . " return stdObject");
+            // $this->_wd(__METHOD__ . " return stdObject");
             return $this->aLibs[$sLibrary]['_cdn']->$sElement;
         }
         if (is_array($this->aLibs[$sLibrary]['_cdn']) && isset($this->aLibs[$sLibrary]['_cdn'][$sElement])){
-            $this->_wd(__METHOD__ . " return array");
+            // $this->_wd(__METHOD__ . " return array");
             return $this->aLibs[$sLibrary]['_cdn'][$sElement];
         }
         return false;
@@ -98,9 +75,9 @@ class cdnorlocaladmin extends cdnorlocal{
         if (!array_key_exists('_cdn', $this->aLibs[$sLibrary])){
             
             $aJson=false;
-            if(!$bRefresh){
-                $aJson=$this->_getLibraryMetadataFromCache($sLibrary);
-            } 
+            // if(!$bRefresh){
+            //     $aJson=$this->_getLibraryMetadataFromCache($sLibrary);
+            // } 
             if(!$aJson){
                 $bHasDoneRefresh=true;
                 $sApiUrl=sprintf($this->sUrlApiPackage, $sLibrary);
@@ -110,9 +87,9 @@ class cdnorlocaladmin extends cdnorlocal{
             // echo '<pre>'.print_r($aJson, 1).'</pre>';
             if($aJson){
                 $this->aLibs[$sLibrary]['_cdn']=$aJson;
-                if($bHasDoneRefresh && $this->isLocalLibrary($sLibrary)){
-                    $this->_putLibraryInfoFile($sLibrary);
-                }
+                // if($bHasDoneRefresh && $this->isLocalLibrary($sLibrary)){
+                //     $this->_putLibraryInfoFile($sLibrary);
+                // }
             }
         }
         if (!array_key_exists('_cdn', $this->aLibs[$sLibrary])){
@@ -124,26 +101,34 @@ class cdnorlocaladmin extends cdnorlocal{
     }
     
     /**
-     * get a flat array with all assets of a library from CDN API
+     * get get metainfos of a library from CDN API fith files and checksums
      * 
      * @param string  $sLibrary  name of the library
      * @param string  $sVersion  optional: version of the library (default: version from local config)
      * @return array
      */
-    public function getLibraryAssets($sLibrary, $sVersion=false) {
-        $this->getLibraryMetadata($sLibrary);
+    public function getLibraryMetainfos($sLibrary, $sVersion=false) {
+        $this->_wd(__METHOD__ . "($sLibrary, $sVersion) start");
         if(!$sVersion){
             // $sVersion=isset($this->aLibs[$sLibrary]['_cdn']->version) ? $this->aLibs[$sLibrary]['_cdn']->version : false;
             $sVersion=$this->getLibraryLatestVersion($sLibrary);
+            $this->_wd(__METHOD__ . ' version: '. $sVersion);
         }
-        $this->_wd(__METHOD__ . ' version: '. $sVersion);
 
-        $sApiUrl=sprintf($this->sUrlApiPackage, "$sLibrary/$sVersion/");
-        $this->_wd(__METHOD__ . "($sLibrary) fetch $sApiUrl");
-        $aJson=json_decode(file_get_contents($sApiUrl), 1);
-        // echo '<pre>'.print_r($aJson, 1).'</pre>';
+        $sLibCachefile=$this->_getLibMetaFile($sLibrary.'__'.$sVersion);
+        if(!file_exists($sLibCachefile)){
+            $sApiUrl=sprintf($this->sUrlApiPackage, "$sLibrary/$sVersion/");
+            $this->_wd(__METHOD__ . "($sLibrary, $sVersion) fetch $sApiUrl");
+            $aJson=json_decode(file_get_contents($sApiUrl), 1);
+
+            $this->_wd(__METHOD__ . "($sLibrary, $sVersion) store $sLibCachefile");
+            file_put_contents($sLibCachefile, json_encode($aJson, JSON_PRETTY_PRINT));
+        } else {
+            $this->_wd(__METHOD__ . "($sLibrary, $sVersion) read cache $sLibCachefile");
+            $aJson=json_decode(file_get_contents($sLibCachefile), 1);
+        }
         
-        return $aJson['files'];
+        return $aJson;
     }
     
     /**
@@ -359,7 +344,8 @@ class cdnorlocaladmin extends cdnorlocal{
      * @return string
      */
     protected function _getInfoFilename($sLibrary){
-        return $this->_getLocalfilename($sLibrary).'/.ht_info_cdnorlocal.json';
+        return $this->_getLocalfilename('').'/'.$this->sCdnMetadir.'/'.$sLibrary.'.json';
+        // return $this->_getLocalfilename($sLibrary).'/.ht_info_cdnorlocal.json';
     }
     
     /**
@@ -368,33 +354,20 @@ class cdnorlocaladmin extends cdnorlocal{
      * @return string
      */
     protected function _getLocalLibsFile(){
-        return $this->_getLocalfilename('').'/.ht_info_all_libs_cdnorlocal.json';
+        return $this->_getLocalfilename('').'/'.$this->sCdnMetadir.'/my_libs.json';
+        // return $this->_getLocalfilename('').'/.ht_info_all_libs_cdnorlocal.json';
     }
 
     /**
-     * store metadata of a library
-     * 
-     * @param  string  $sLibrary  name of library
-     * @return boolean
-     */
-    protected function _putLibraryInfoFile($sLibrary){
-        $this->_wd(__METHOD__ . "($sLibrary)");
-        $sJsonfile=$this->_getInfoFilename($sLibrary);
-        if(!is_dir(dirname($sJsonfile))){
-            mkdir(dirname($sJsonfile), 0755, 1);
-        }
-        return file_put_contents($sJsonfile, json_encode($this->aLibs[$sLibrary]));
-    }
-
-    /**
-     * store fresh metadata of all downloaded libraries
+     * store fresh metadata of all downloaded libraries and versions
      * 
      * @return boolean
      */
     protected function _putLocalLibsFile(){
         $sJsonfile=$this->_getLocalLibsFile();
-        return file_put_contents($sJsonfile, json_encode($this->_reReadLibdirs()));
+        return file_put_contents($sJsonfile, json_encode($this->_reReadLibdirs(), JSON_PRETTY_PRINT));
     }
+
     
     /**
      * get fresh data with reading  local vendor dir and find downloaded 
@@ -409,15 +382,14 @@ class cdnorlocaladmin extends cdnorlocal{
             foreach (glob($sLocaldir . '*', GLOB_ONLYDIR) as $sLibdir){
                 if (is_dir($sLibdir)){
                     $sLib2test=basename($sLibdir);
-                    if(file_exists($this->_getInfoFilename($sLib2test))){
-                        foreach (glob($sLibdir . '/*', GLOB_ONLYDIR) as $sVersiondir){
-                            if(!preg_match('/_in_progressXXXX/', $sVersiondir)){
-                                if(!array_key_exists($sLib2test, $aReturn)){
-                                    $aReturn[$sLib2test]=array();
-                                }
-                                $aReturn[$sLib2test][]=basename($sVersiondir);
-                                krsort($aReturn[$sLib2test]);
+                    foreach (glob($sLibdir . '/*', GLOB_ONLYDIR) as $sVersiondir){
+                        if(!preg_match('/_in_progressXXXX/', $sVersiondir)){
+                            if(!array_key_exists($sLib2test, $aReturn)){
+                                $aReturn[$sLib2test]=array();
                             }
+                            $aReturn[$sLib2test][]=basename($sVersiondir);
+                            $this->getLibraryMetainfos($sLib2test, basename($sVersiondir));
+                            krsort($aReturn[$sLib2test]);
                         }
                     }
                 }
@@ -447,7 +419,7 @@ class cdnorlocaladmin extends cdnorlocal{
     }
 
     /**
-     * delete a local library 
+     * delete a version of a local library 
      * 
      * @param  string  $sLibrary  name of library
      * @param  string  $sVersion  version to delete
@@ -457,13 +429,11 @@ class cdnorlocaladmin extends cdnorlocal{
         
         $sRelUrl=$sLibrary.'/'.$sVersion;
         $sLocaldir=$this->_getLocalfilename($sRelUrl);
-        
+
         if ($this->_rrmdir($sLocaldir)){
-            // was it the last existing version for this library?
-            if(!count(glob($this->_getLocalfilename($sLibrary.'/').'/*'))){
-                unlink($this->_getInfoFilename($sLibrary));
-                @rmdir($this->_getLocalfilename($sLibrary));
-            }
+            // try: delete the lib directory if it was the last version
+            @rmdir($this->_getLocalfilename($sLibrary));
+            unlink($this->_getLibMetaFile($sLibrary.'__'.$sVersion));
         }
 
         // refresh local view
@@ -493,13 +463,14 @@ class cdnorlocaladmin extends cdnorlocal{
 
         $iMaxFiles=50;
         $iFilesLeft=0;
-        $iFilesTotal=count($this->getLibraryAssets($sLibrary, $sVersion));
-        $this->_putLibraryInfoFile($sLibrary);
-        $this->_putLocalLibsFile();
+        $aAssetDataFromCdn=$this->getLibraryMetainfos($sLibrary, $sVersion);
+
+        $iFilesTotal=count($aAssetDataFromCdn['files']);
+        // $this->_putLibraryInfoFile($sLibrary);
         
         // --- get the first N files...
         $aDownloads=array();
-        foreach($this->getLibraryAssets($sLibrary, $sVersion) as $sFilename){
+        foreach($aAssetDataFromCdn['files'] as $sFilename){
             if (!file_exists($sTmpdir.'/'.$sFilename) || !filesize($sTmpdir.'/'.$sFilename) ){
                 if(count($aDownloads) < $iMaxFiles){
                     $aDownloads[]=array(
@@ -513,7 +484,7 @@ class cdnorlocaladmin extends cdnorlocal{
         $this->_httpGet($aDownloads);
         
         // --- verify if all was downloaded
-        foreach($this->getLibraryAssets($sLibrary, $sVersion) as $sFilename){
+        foreach($aAssetDataFromCdn['files'] as $sFilename){
             if (!file_exists($sTmpdir.'/'.$sFilename)){
                 $iFilesLeft++;
                 $this->_wd(__METHOD__ . ' file still missing: '. $sTmpdir.'/'.$sFilename);
@@ -529,6 +500,8 @@ class cdnorlocaladmin extends cdnorlocal{
             }
             $this->_wd(__METHOD__ . ' move '. $sTmpdir.' to '.$sLocaldir);
             rename($sTmpdir, $sLocaldir);
+
+            // file_put_contents($this->_getLibMetaFile($sLibrary.'__'.$sVersion), json_encode($aAssetDataFromCdn, JSON_PRETTY_PRINT));
         } else {
             $this->_wd(__METHOD__ . ' download not complete ???' . $bAllDownloaded ? ' all files were downloaded' : 'missing some files.');
             echo "downloading ".count($aDownloads)." files per request..."

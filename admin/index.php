@@ -72,7 +72,7 @@ $aNav=array(
         'descr'=>'Search for libraries with CDNJS API',
     ),
     'browse'=>array(
-        'label'=>'Browse',
+        'label'=>'Downloaded libs',
         'descr'=>'Browse local directory and see downloaded libraries.',
     ),
 );
@@ -135,7 +135,7 @@ function renderLocalLibs($bSidebar=false){
         if ($oCdn->delete($sLibrary, $sVersion)){
             return '<br><br>'. getIcon('library').'<strong>'.$sLibrary .'</strong> v'.$sVersion.' was deleted <a href="'.$sUrl.'" class="button">OK</a>';
         }
-        return showError('Cannot delete <strong>'.$sLibrary.' v'.$sVersion.'</strong>.');
+        return showError('Cannot delete <strong>'.$sLibrary.' v'.$sVersion.'</strong>. Check the files that are still in [vendor]/'.$sLibrary.'/'.$sVersion.'/.');
     }
     
     $sUrlRefresh= $sLibAction==='refresh' ? '': '?'.$_SERVER["QUERY_STRING"].'&libaction=refresh';
@@ -208,7 +208,7 @@ function renderLocalLibs($bSidebar=false){
                             . ($sLatestVersion && $sLatestVersion===$sLibversion ? '<span class="ok">'.getIcon('ok').'Up to date</span>' : '')
                             . ($sLatestVersion && version_compare($sLatestVersion, $sLibversion, '>') ? '<span class="warning">'.getIcon('warning').'outdated</span>' : '')
                             .'</td>'
-                            . '<td>'.($sLatestVersion===$sLibversion ? '' : '<a href="?module=search&action=detail&library='.$sMyLibrary.'&version='.$sLibversion.'&q='.$sLibrarySearch.'" title="Show details for latest version '.$sLatestVersion.' of &quot;'.$sMyLibrary.'&quot;">'.getIcon('version').$sLatestVersion.'</a>').'</td>'
+                            . '<td>'.($sLatestVersion===$sLibversion ? '' : '<a href="?module=search&action=detail&library='.$sMyLibrary.'&version='.$sLatestVersion.'&q='.$sLibrarySearch.'" title="Show details for latest version '.$sLatestVersion.' of &quot;'.$sMyLibrary.'&quot;">'.getIcon('version').$sLatestVersion.'</a>').'</td>'
                             . '<td>'.$sDateOfDownload.'</td>'
                             . '<td>'.$sBtnDelete.'</a> </td>'
                          : ''
@@ -393,7 +393,7 @@ switch ($sModule) {
                 } else {
                     $sOut .= '(version ' . $sVersion. ')';
                 }
-                $aFiles = $oCdn->getLibraryAssets($sLibrary, $sVersion);
+                $aFiles = $oCdn->getLibraryMetainfos($sLibrary, $sVersion)['files'];
                 if(!$aFiles || !count($aFiles)){
                     $sOut .= showError('The version ['.$sVersion.'] seems to be wrong (no file was detected).')
                             . '<br><br><br>'
