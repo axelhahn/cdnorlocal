@@ -175,13 +175,13 @@ class cdnorlocal
      * return the local filename if it exists
      * 
      * @param string $sRelUrl  relative url of css/ js file (i.e. "jquery/3.2.1/jquery.min.js")
-     * @return type
+     * @return string|bool
      */
     public function getLocalfile($sRelUrl)
     {
         return file_exists($this->_getLocalfilename($sRelUrl))
             ? $this->_getLocalfilename($sRelUrl)
-            : false;;
+            : false;
     }
 
     /**

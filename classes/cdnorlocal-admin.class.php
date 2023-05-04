@@ -593,7 +593,7 @@ class cdnorlocaladmin extends cdnorlocal
      * search for a library with CDN API
      * 
      * @param string  $sLibrary  name of the library to ask for
-     * @return array
+     * @return object
      */
     public function searchLibrary($sLibrary)
     {
