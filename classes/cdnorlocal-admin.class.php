@@ -10,7 +10,7 @@ require_once 'cdnorlocal.class.php';
  * admin functions to request API, download, read existing local downloads
  * This file is needed by admin/index.php only - NOT in your projects to publish
  *
- * @version 1.0.10
+ * @version 1.0.11
  * @author Axel Hahn
  * @link https://www.axel-hahn.de
  * @license GPL
@@ -126,8 +126,10 @@ class cdnorlocaladmin extends cdnorlocal
             $this->_wd(__METHOD__ . "($sLibrary, $sVersion) fetch $sApiUrl");
             $aJson = json_decode(file_get_contents($sApiUrl), 1);
 
-            $this->_wd(__METHOD__ . "($sLibrary, $sVersion) store $sLibCachefile");
-            file_put_contents($sLibCachefile, json_encode($aJson, JSON_PRETTY_PRINT));
+            if(is_array($aJson)){
+                $this->_wd(__METHOD__ . "($sLibrary, $sVersion) store $sLibCachefile");
+                file_put_contents($sLibCachefile, json_encode($aJson, JSON_PRETTY_PRINT));
+            }
         } else {
             $this->_wd(__METHOD__ . "($sLibrary, $sVersion) read cache $sLibCachefile");
             $aJson = json_decode(file_get_contents($sLibCachefile), 1);
@@ -490,7 +492,10 @@ class cdnorlocaladmin extends cdnorlocal
         $iFilesLeft = 0;
         $aAssetDataFromCdn = $this->getLibraryMetainfos($sLibrary, $sVersion);
 
-        $iFilesTotal = count($aAssetDataFromCdn['files']);
+        $iFilesTotal = isset($aAssetDataFromCdn['files']) ? count($aAssetDataFromCdn['files']) : 0;
+        if(!$iFilesTotal){
+            return false;
+        }
         // $this->_putLibraryInfoFile($sLibrary);
 
         // --- get the first N files...
@@ -535,7 +540,9 @@ class cdnorlocaladmin extends cdnorlocal
                 . "<script>window.setTimeout('location.reload();', 2000);</script>";
             die();
         }
-        $this->_putLocalLibsFile();
+        if($iFilesTotal) {
+            $this->_putLocalLibsFile();
+        }
         echo "<script>window.setTimeout('location.reload();', 20);</script>";
 
         return true;
