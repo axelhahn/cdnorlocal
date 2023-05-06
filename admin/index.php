@@ -395,9 +395,11 @@ switch ($sModule) {
                 }
                 $aFiles = $oCdn->getLibraryMetainfos($sLibrary, $sVersion)['files'];
                 if (!$aFiles || !count($aFiles)) {
-                    $sOut .= showError('The version [' . $sVersion . '] seems to be wrong (no file was detected).')
-                        . '<br><br><br>'
-                        . '<a href="?module=search&action=detail&library=' . $sLibrary . '" class="button">current version of ' . getIcon('library') . '<strong>' . $sLibrary . '</strong></a>';
+                    $sOut .= '<br><br><br>'
+                    . '<a href="?module=search&action=detail&library=' . $sLibrary . '" class="button">current version of ' . getIcon('library') . '<strong>' . $sLibrary . '</strong></a><br><br>'
+                    . showError('The version [' . $sVersion . '] seems to be wrong (no file was detected).')
+                    . '<br>'
+                    ;
                     break;
                 }
 

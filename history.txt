@@ -13,4 +13,5 @@ CDN OR LOCAL :: HISTORY
 2019-11-23  v1.0.8   sortorder of versions per library is now newest to lowest version
 2023-04-28  v1.0.9   update becaue of change in CDNJS API --> see https://github.com/cdnjs/cdnjs/issues/14140
 2023-04-30  v1.0.10  move cache file to [vendor]/.cdndata; add checksums in getHtmlInclude()
+2023-05-06  v1.0.11  fix download of metafile of non-existing versions
 -------------------------------------------------------------------------------

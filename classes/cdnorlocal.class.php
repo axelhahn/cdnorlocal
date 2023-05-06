@@ -22,7 +22,7 @@ namespace axelhahn;
  * AND/ OR
  * https://unpkg.com/
  * 
- * @version 1.0.10
+ * @version 1.0.11
  * @author Axel Hahn
  * @link https://www.axel-hahn.de
  * @license GPL
@@ -32,7 +32,7 @@ namespace axelhahn;
 class cdnorlocal
 {
 
-    protected $sVersion = '1.0.10';
+    protected $sVersion = '1.0.11';
 
     /**
      * flag to show debugging infos (used in _wd method [write debug])
