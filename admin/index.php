@@ -13,11 +13,11 @@
 require_once '../classes/cdnorlocal-admin.class.php';
 
 $sOut = '';
-$oCdn = new axelhahn\cdnorlocaladmin(array(
+$oCdn = new axelhahn\cdnorlocaladmin([
     'vendordir' => __DIR__ . '/../vendor',
     'vendorurl' => '../vendor',
     'debug' => 0
-));
+]);
 
 $sModule = getQueryparam('module', 'search');
 $sAction = getQueryparam('action');
@@ -29,7 +29,7 @@ $sVersion = getQueryparam('version');
 // CONFIG
 // ----------------------------------------------------------------------
 
-$aIcons = array(
+$aIcons = [
 
     'nav-search' => 'fa fa-globe',
     'nav-browse' => 'fa fa-folder-open',
@@ -57,10 +57,10 @@ $aIcons = array(
     'error' => 'fa fa-bolt',
 
     'linkextern' => 'fa fa-external-link',
-);
+];
 
 
-$aNav = array(
+$aNav = [
     /*
     'home'=>array(
         'label'=>'Homepage',
@@ -68,15 +68,15 @@ $aNav = array(
     ),
      * 
      */
-    'search' => array(
+    'search' => [
         'label' => 'API Search',
         'descr' => 'Search for libraries with CDNJS API',
-    ),
-    'browse' => array(
+    ],
+    'browse' => [
         'label' => 'Downloaded libs',
         'descr' => 'Browse local directory and see downloaded libraries.',
-    ),
-);
+    ],
+];
 
 // ----------------------------------------------------------------------
 // functions
@@ -227,7 +227,11 @@ function renderLocalLibs($bSidebar = false)
             ? '<br><strong>' . getIcon('download') . 'Downloaded Libraries</strong><br><br>'
             : ''
             . '<br>'
-            . ($sUrlRefresh ? '<a href="' . $sUrlRefresh . '" class="button" title="re-read local directories to scan downloaded libs">' . getIcon('refresh') . 'Refresh</a>' : '')
+            . ($sUrlRefresh
+                ? '<a href="' . $sUrlRefresh . '" class="button" title="re-read local directories to scan downloaded libs">' . getIcon('refresh') . 'Refresh</a>'
+                . ' << Re-read local directories to scan downloaded libs. This creates missing meta cache files too.'
+                : ''
+            )
             . '<br><h2>' . getIcon('download') . 'Downloaded Libraries (' . count($aLocalLibs) . ')</h2>'
             . ''
 
@@ -315,7 +319,7 @@ switch ($sModule) {
             $sTryme .= '<p>
                 You have no idea?!<br>
                 Try one of these ...';
-            foreach (array(
+            foreach ([
                 'jquery',
                 'bootstrap',
                 'chart',
@@ -323,7 +327,7 @@ switch ($sModule) {
                 'icon',
                 'player',
                 'video',
-            ) as $sTry) {
+            ] as $sTry) {
                 $sTryme .= '<a href="?module=search&q=' . $sTry . '" title="search for &quot;' . $sTry . '&quot;">' . getIcon('search') . $sTry . '</a> ';
             }
             $sTryme .= '</p>';
@@ -396,10 +400,9 @@ switch ($sModule) {
                 $aFiles = $oCdn->getLibraryMetainfos($sLibrary, $sVersion)['files'];
                 if (!$aFiles || !count($aFiles)) {
                     $sOut .= '<br><br><br>'
-                    . '<a href="?module=search&action=detail&library=' . $sLibrary . '" class="button">current version of ' . getIcon('library') . '<strong>' . $sLibrary . '</strong></a><br><br>'
-                    . showError('The version [' . $sVersion . '] seems to be wrong (no file was detected).')
-                    . '<br>'
-                    ;
+                        . '<a href="?module=search&action=detail&library=' . $sLibrary . '" class="button">current version of ' . getIcon('library') . '<strong>' . $sLibrary . '</strong></a><br><br>'
+                        . showError('The version [' . $sVersion . '] seems to be wrong (no file was detected).')
+                        . '<br>';
                     break;
                 }
 
