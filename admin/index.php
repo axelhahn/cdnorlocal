@@ -263,11 +263,12 @@ function renderLocalLibs($bSidebar = false)
 }
 
 /**
- * get a GET param
- * @param type $sParam
- * @return type
+ * get a POST or GET param
+ * @param string $sParam   parameter name from POST or GET
+ * @param mixed  $default  optional: default value to return; default: false
+ * @return mixed
  */
-function getQueryparam($sParam, $default = false)
+function getQueryparam(string $sParam, mixed $default = false): mixed
 {
     if (isset($_POST) && array_key_exists($sParam, $_POST)) {
         return preg_replace('/[^a-zA-Z0-9\ \_\-\.]/', '', $_POST[$sParam]);
