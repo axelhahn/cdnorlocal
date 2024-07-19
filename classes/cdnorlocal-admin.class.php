@@ -47,8 +47,11 @@ class cdnorlocaladmin extends cdnorlocal
     {
         $this->_wd(__METHOD__ . "($sLibrary, $sElement)");
         if (!isset($this->aLibs[$sLibrary]['_cdn'])) {
-            // $this->getLibraryMetadata($sLibrary);
-            // $this->_wd(__METHOD__ . " return false - no CDN data");
+            $this->_wd(__METHOD__ . " Refresh data for $sLibrary...");
+            $this->getLibraryMetadata($sLibrary);
+        }
+        if (!isset($this->aLibs[$sLibrary]['_cdn'])) {
+                // $this->_wd(__METHOD__ . " return false - no CDN data");
             return false;
         }
 
@@ -579,7 +582,7 @@ class cdnorlocaladmin extends cdnorlocal
      */
     protected function _orderByNewestVersion(string $a, string $b): bool|int
     {
-        $this->_wd(__METHOD__ . "($a, $b)");
+        // $this->_wd(__METHOD__ . "($a, $b)");
         if ($a == $b) {
             return 0;
         }
@@ -620,18 +623,17 @@ class cdnorlocaladmin extends cdnorlocal
     // ----------------------------------------------------------------------
 
     /**
-     * Search for a library with CDN API
+     * Search for a library with CDN API and return stdClass Object
      * 
      * @param string  $sLibrary  name of the library to ask for
-     * @return array
+     * @return object
      */
-    public function searchLibrary(string $sLibrary): array
+    public function searchLibrary(string $sLibrary): object
     {
         $this->_wd(__METHOD__ . "($sLibrary)");
         $sApiUrl = sprintf($this->sUrlApiPackage, '?search=' . str_replace(' ', '+', $sLibrary) . '&fields=version,description');
         $this->_wd(__METHOD__ . " fetch $sApiUrl");
         $aJson = json_decode(file_get_contents($sApiUrl));
-
         return $aJson;
     }
 }
