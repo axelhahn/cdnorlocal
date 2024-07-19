@@ -16,5 +16,6 @@ CDN OR LOCAL :: HISTORY
 2023-05-06  v1.0.11  fix download of metafile of non-existing versions
 2023-05-07  v1.0.12  update _getLibMetaFile; code freshup
 2023-05-10  v1.0.13  a set vendor dir must not exist on constructor; create cdnmetadata dir if needed 
+2024-07-19  v1.0.14  WIP: php 8 only; declare variable types
 
 -------------------------------------------------------------------------------
