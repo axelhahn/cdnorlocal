@@ -552,7 +552,7 @@ switch ($sModule) {
     <style>
         body {
             background: #304048;
-            background: linear-gradient(#405080, #305060, #102030) fixed;
+            background: linear-gradient(#505080, #304070, #202030) fixed;
             color: #9bd;
             font-family: verdana, "arial";
             margin: 0;
@@ -567,9 +567,9 @@ switch ($sModule) {
         }
 
         h1 {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.1);
             border-radius: 0.3em 0.3em 0 0;
-            color: #a9f;
+            color: #c5f;
             text-shadow: 1px 1px 2px #000, 0 0 0.8em #abc;
             font-size: 250%;
             margin: 0;
@@ -581,13 +581,13 @@ switch ($sModule) {
         }
 
         h2 {
-            color: #ae5;
+            color: #fb4;
             font-size: 240%;
             text-shadow: 1px 1px 0 #000, 0 0 0.7em #000;
         }
 
         h3 {
-            color: #a6b;
+            color: #c6d;
             font-size: 220%;
             margin: 1.5em 0 0 0;
             text-shadow: 1px 1px 0 #000;
@@ -624,6 +624,7 @@ switch ($sModule) {
             margin: 0 0.3em 0 0;
             padding: 0;
             background: rgba(0, 0, 0, 0.1);
+            border-radius: 0.3em 0.3em 0 0;
         }
 
         nav>ul>li>a {
@@ -633,7 +634,10 @@ switch ($sModule) {
         }
 
         nav>ul>li.active {
-            border-top: 2px solid #9c2;
+            border-top: 3px solid #fb2;
+        }
+        nav>ul>li.active a{
+            color: #eee;
         }
 
         pre {
@@ -664,7 +668,7 @@ switch ($sModule) {
         }
 
         #footer {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(0,0,0, 0.1);
             border-radius: 1em;
             margin: 4em auto 3em;
             padding: 1em;
@@ -673,8 +677,10 @@ switch ($sModule) {
         }
 
         #main {
-            background: rgba(0, 0, 0, 0.1);
+            /* background: rgba(0, 0, 0, 0.1); */
             border-radius: 1em;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            border: 5px solid rgba(255,255,255,0.03);
             margin: 2em auto 0;
             padding: 1em;
             width: 90%;
@@ -742,6 +748,7 @@ switch ($sModule) {
 
         .hint {
             padding: 1em;
+            border-top-right-radius: 1em;
         }
 
         .hint,
@@ -764,7 +771,7 @@ switch ($sModule) {
     <?php
     // echo $oCdn->getHtmlInclude('jquery/jquery.min.js');
     // echo $oCdn->getHtmlInclude('font-awesome/4.7.0/css/font-awesome.min.css');
-    echo $oCdn->getHtmlInclude('font-awesome/6.4.0/css/all.min.css');
+    echo $oCdn->getHtmlInclude('font-awesome/6.7.1/css/all.min.css');
 
     ?>
 </head>
